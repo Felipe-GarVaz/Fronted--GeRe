@@ -1,0 +1,261 @@
+.reportHistoryContainer {
+  max-width: 1000px;
+  margin: 0 auto;
+  padding: 20px;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+h1 {
+  color: #003366;
+  text-align: center;
+  margin-bottom: 30px;
+}
+
+.reportHistoryContainer .searchBox {
+  background-color: #fff;
+  padding: 20px;
+  border-radius: 10px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.06);
+  width: 100%;
+  box-sizing: border-box;
+}
+
+
+.reportHistoryContainer .searchLabel {
+  font-weight: 600;
+  color: #003366;
+  font-size: 16px;
+}
+
+.reportHistoryContainer .searchInputGroup {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  align-items: stretch;
+}
+
+.reportHistoryContainer .searchSection {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-bottom: 25px;
+  align-items: stretch; 
+}
+
+.reportHistoryContainer .searchInputContainer {
+  position: relative;
+  flex-grow: 1;
+  flex-basis: 0;
+  min-width: 250px;
+}
+
+.reportHistoryContainer .searchInput {
+  width: 100%;
+  padding: 14px 1px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  font-size: 16px;
+  background-color: #ffffff;
+  box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.05);
+  transition: border 0.3s;
+}
+
+.reportHistoryContainer .searchInput:focus {
+  border-color: #003366;
+  outline: none;
+}
+
+.reportHistoryContainer .searchInput::placeholder {
+  color: #999;
+}
+
+.reportHistoryContainer .clearBtn {
+  padding: 12px 20px;
+  background-color: #e74c3c;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-size: 15px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background-color 0.3s;
+  height: auto; /* Antes: 100% (problemático) */
+  white-space: nowrap;
+  align-self: stretch; /* Estira verticalmente en pantallas grandes */
+}
+
+.reportHistoryContainer .clearBtn:hover {
+  background-color: #c0392b;
+}
+
+.reportHistoryContainer .suggestionsList {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  background-color: white;
+  border: 1px solid #ddd;
+  border-top: none;
+  border-radius: 0 0 4px 4px;
+  max-height: 200px;
+  overflow-y: auto;
+  z-index: 10;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.reportHistoryContainer .suggestionItem {
+  padding: 10px;
+  cursor: pointer;
+  font-size: 15px;
+  transition: background-color 0.2s;
+}
+
+.reportHistoryContainer .suggestionItem:hover {
+  background-color: #f0f0f0;
+}
+
+.reportHistoryContainer .reportsList {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.reportHistoryContainer .reportCard {
+  background: #ffffff;
+  border-radius: 10px;
+  padding: 20px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  transition: transform 0.2s ease;
+}
+
+.reportHistoryContainer .reportCard:hover {
+  transform: translateY(-4px);
+}
+
+.reportHistoryContainer .reportHeader {
+  display: flex;
+  justify-content: space-between;
+  border-bottom: 1px solid #eee;
+  padding-bottom: 10px;
+  margin-bottom: 10px;
+  font-weight: bold;
+}
+
+.reportHistoryContainer .vehicleInfo {
+  color: #003366;
+}
+
+.reportHistoryContainer .reportDate {
+  color: #888;
+  font-size: 0.9em;
+}
+
+.reportHistoryContainer .statusChange {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 15px;
+}
+
+.reportHistoryContainer .statusBadge {
+  padding: 6px 14px;
+  border-radius: 20px;
+  font-size: 14px;
+  font-weight: 600;
+  text-transform: capitalize;
+}
+
+.reportHistoryContainer .statusBadge.timer {
+  background-color: #007bff; 
+  color: white;
+  padding: 4px 10px;
+  border-radius: 12px;
+  font-size: 0.9rem;
+  font-weight: bold;
+  margin-left: 8px;
+}
+
+.reportHistoryContainer .oldNew.disponible {
+  background-color: #2ecc71;
+  color: white;
+}
+
+.reportHistoryContainer .oldNew.operando_con_falla {
+  background-color: #f39c12;
+  color: white;
+}
+
+.reportHistoryContainer .oldNew.indisponible {
+  background-color: #e74c3c;
+  color: white;
+}
+
+.reportHistoryContainer .detailRow {
+  margin: 8px 0;
+  font-size: 0.95rem;
+  color: #333;
+}
+
+.reportHistoryContainer .detailRow strong {
+  color: #333;
+  margin-right: 6px;
+}
+
+.reportHistoryContainer .detailRow span {
+  color: #444;
+}
+
+.reportHistoryContainer .reportedBy {
+  margin-top: 15px;
+  font-size: 0.85em;
+  color: #666;
+  text-align: right;
+  font-style: italic;
+}
+
+.reportHistoryContainer .reportedBy .rpe {
+  color: #555;
+  font-weight: 500;
+  margin-left: 5px;
+  font-size: 0.95rem;
+}
+
+.reportHistoryContainer .noReports {
+  text-align: center;
+  padding: 30px;
+  color: #666;
+  background-color: #f9f9f9;
+  border-radius: 8px;
+  font-style: italic;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .reportHistoryContainer .searchSection {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .reportHistoryContainer .searchInputContainer {
+    width: 100%;
+  }
+
+  .reportHistoryContainer .searchInput {
+    width: 100%;
+  }
+
+  .reportHistoryContainer .clearBtn {
+    width: 100%;
+    margin-top: 10px;
+    align-self: auto; 
+  }
+
+  .reportHistoryContainer .searchInputGroup {
+    flex-direction: column;
+  }
+
+}
+

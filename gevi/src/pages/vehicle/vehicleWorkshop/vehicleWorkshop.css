@@ -1,0 +1,166 @@
+.workshopContainer {
+  max-width: 1000px;
+  margin: 0 auto;
+  padding: 20px;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+h1 {
+  text-align: center;
+  color: #003366;
+  margin-bottom: 30px;
+}
+
+.workshopContainer .vehicleGrid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px;
+  justify-content: center;
+}
+
+.workshopContainer .vehicleCard {
+  background-color: #fff;
+  padding: 20px;
+  width: 280px;
+  border-radius: 10px;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+  border-left: 5px solid #e74c3c;
+}
+
+.workshopContainer .vehicleCard h3 {
+  color: #003366;
+  margin-bottom: 10px;
+}
+
+.workshopContainer .vehicleCard p {
+  margin: 6px 0;
+  color: #444;
+}
+
+.workshopContainer .vehicleCard strong {
+  color: #000;
+}
+
+.workshopContainer .searchBox {
+ background-color: #fff;
+  padding: 20px;
+  border-radius: 10px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.06);
+  margin-bottom: 25px;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.workshopContainer .searchLabel {
+  display: block;
+  font-weight: 600;
+  margin-bottom: 10px;
+  color: #003366;
+  font-size: 16px;
+}
+
+.workshopContainer .searchInputGroup {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  align-items: stretch;
+}
+
+.workshopContainer .searchInputContainer {
+  position: relative;
+  flex-grow: 1;
+  min-width: 250px;
+}
+
+.workshopContainer .searchInput {
+  width: 100%;
+  padding: 14px 1px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  font-size: 16px;
+  background-color: #ffffff;
+  box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.05);
+  transition: border 0.3s;
+}
+
+.workshopContainer .searchInput:focus {
+  border-color: #003366;
+  outline: none;
+}
+
+.workshopContainer .searchInput::placeholder {
+  color: #999;
+}
+
+.workshopContainer .clearBtn {
+  padding: 12px 20px;
+  background-color: #e74c3c;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-size: 15px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background-color 0.3s;
+  height: auto; 
+  white-space: nowrap;
+  align-self: stretch;
+}
+
+.workshopContainer .clearBtn:hover {
+  background-color: #c0392b;
+}
+
+.workshopContainer .suggestionsList {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  background-color: white;
+  border: 1px solid #ddd;
+  border-top: none;
+  border-radius: 0 0 4px 4px;
+  max-height: 200px;
+  overflow-y: auto;
+  z-index: 10;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.workshopContainer .suggestionItem {
+  padding: 10px;
+  cursor: pointer;
+  font-size: 15px;
+  transition: background-color 0.2s;
+}
+
+.workshopContainer .suggestionItem:hover {
+  background-color: #f0f0f0;
+}
+
+.workshopContainer .statusBadge.timer {
+  background-color: #007bff; 
+  color: white;
+  padding: 4px 10px;
+  border-radius: 12px;
+  font-size: 0.9rem;
+  font-weight: bold;
+  margin-left: 8px;
+}
+
+
+
+/* Responsive */
+@media (max-width: 600px) {
+ .workshopContainer .vehicleCard {
+    width: 100%;
+  }
+
+  .workshopContainer .clearBtn {
+    width: 100%;
+    margin-top: 10px;
+    align-self: auto; 
+  }
+}

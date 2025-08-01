@@ -1,0 +1,151 @@
+.deviceListContainer {
+  padding: 20px;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  min-height: 100vh;
+}
+
+h1 {
+  color: #003366;
+  margin-bottom: 20px;
+  text-align: center;
+}
+
+/* Sección de filtros */
+.deviceListContainer .filtersSection {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 15px;
+  margin-bottom: 25px;
+  padding: 15px;
+  background-color: #f5f7fa;
+  border-radius: 8px;
+  align-items: flex-end;
+}
+
+.deviceListContainer .searchGroup {
+  display: flex;
+  flex-direction: column;
+  min-width: 200px;
+}
+
+.deviceListContainer .searchGroup label {
+  margin-bottom: 5px;
+  font-weight: 600;
+  color: #003366;
+  font-size: 16px;
+}
+
+.deviceListContainer .searchGroup input {
+  padding: 8px 12px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 14px;
+}
+
+/* Contadores */
+.deviceListContainer .DeviceCounters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 15px;
+  margin-bottom: 25px;
+}
+
+.deviceListContainer .counterBox {
+  flex: 1 1 200px;
+  padding: 12px 16px;
+  border-radius: 8px;
+  color: white;
+  font-weight: bold;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+/* Colores por tipo de dispositivo */
+.deviceListContainer .counterBox.Total {
+  background-color: #0056b3;
+}
+
+.deviceListContainer .counterBox.TotalDamaged {
+  background-color: #e74c3c;
+}
+
+.deviceListContainer .counterBox.TPNewland {
+  background-color: #17a2b8;
+}
+
+.deviceListContainer .counterBox.LectorNewland {
+  background-color: #17a2b8;
+}
+
+.deviceListContainer .counterBox.TPDolfin {
+  background-color: #17a2b8;
+}
+
+.deviceListContainer .counterBox.LectorDolfin {
+  background-color: #17a2b8;
+}
+
+.deviceListContainer .counterBox .damaged {
+  font-size: 0.9rem;
+  color: #ffc107;
+  font-weight: 500;
+}
+
+/* Tabla */
+.deviceListContainer .tableContainer {
+  overflow-x: auto;
+  background-color: white;
+  border-radius: 8px;
+  padding: 1rem;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 10px;
+  font-size: 14px;
+}
+
+th,
+td {
+  padding: 12px 15px;
+  text-align: center;
+  border-bottom: 1px solid #ddd;
+}
+
+th {
+  background-color: #003366;
+  color: white;
+  text-transform: uppercase;
+  position: sticky;
+  top: 0;
+}
+
+tr:hover {
+  background-color: #f5f5f5;
+}
+
+.noResults {
+  text-align: center;
+  padding: 20px;
+  color: #777;
+  font-style: italic;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .deviceListContainer .filtersSection {
+    flex-direction: column;
+  }
+
+  .deviceListContainer .searchGroup{
+    width: 100%;
+  }
+
+  table {
+    font-size: 13px;
+  }
+}

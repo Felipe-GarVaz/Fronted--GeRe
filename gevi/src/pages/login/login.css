@@ -1,0 +1,100 @@
+body {
+  margin: 0;
+  font-family: "Segoe UI", sans-serif;
+  background: linear-gradient(to bottom, #a6d4b3, #ffffff);
+}
+
+.loginContainer {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+}
+
+.loginContainer .loginCard {
+  background: white;
+  padding: 40px 30px;
+  border-radius: 25px;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+  text-align: center;
+  width: 360px;
+}
+
+.loginContainer .title {
+  color: #007b5e;
+  font-size: 26px;
+  font-weight: bold;
+  letter-spacing: 2px;
+}
+
+.loginContainer .subtitle {
+  margin: 5px 0 20px;
+  color: #003f34;
+  font-weight: 500;
+}
+
+.loginContainer .logo {
+  width: 100px;
+  margin: 10px 0 25px;
+}
+
+.loginContainer .formGroup {
+  display: flex;
+  align-items: center;
+  background: #f4f4f4;
+  border: 2px solid #007b5e;
+  border-radius: 25px;
+  margin: 15px 0;
+  padding: 8px 15px;
+}
+
+.loginContainer .icon {
+  font-size: 18px;
+  color: #007b5e;
+  margin-right: 10px;
+}
+
+input {
+  flex: 1;
+  border: none;
+  background: transparent;
+  outline: none;
+  font-size: 16px;
+}
+
+.loginContainer .btnLogin {
+  margin-top: 25px;
+  width: 100%;
+  background-color: #004b40;
+  color: white;
+  border: none;
+  padding: 12px;
+  border-radius: 25px;
+  font-size: 16px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background 0.3s ease;
+}
+
+.loginContainer .btnLogin:hover {
+  background-color: #00352d;
+}
+
+.loginContainer .error-message {
+  color: #d32f2f;
+  font-weight: bold;
+  text-align: center;
+  margin-bottom: 10px;
+}
+
+@media (max-width: 480px) {
+  .loginContainer {
+    padding: 0 20px; /* Añade espacio a los lados en móviles */
+  }
+
+  .loginContainer .loginCard {
+    width: 100%;
+    padding: 30px 20px; /* Reduce padding interno para que no se vea comprimido */
+  }
+}
+

@@ -10,7 +10,7 @@ const Layout = ({ children }) => {
         {children}
       </main>
       <footer className="footer">
-        <p>© {new Date().getFullYear()} CFE. Todos los derechos reservados.</p>
+        <p>© {new Date().getFullYear()} CFE. Todos los derechos reservados. FRGV</p>
       </footer>
     </div>
   );

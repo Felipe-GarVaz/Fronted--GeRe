@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import "./login.css";
-import cfeLogo from '../../assets/images/cfe-logo.png';
+import gestion from '../../assets/images/gestion.png';
 import axios from "axios";
 
 const Login = () => {
@@ -58,9 +58,9 @@ const Login = () => {
   return (
     <div className="loginContainer">
       <div className="loginCard">
-        <h1 className="title">GEVI</h1>
-        <p className="subtitle">Gestión Vehícular</p>
-        <img src={cfeLogo} alt="CFE Logo" className="logo" />
+        <h1 className="title">GERE</h1>
+        <p className="subtitle">Gestión De Recursos</p>
+        <img src={gestion} alt="gestion" className="logo" />
 
         <form onSubmit={handleSubmit}>
           <div className="formGroup">

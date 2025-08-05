@@ -18,7 +18,7 @@ const VehicleMenu = () => {
     },
     {
       title: "Historial de Vehículo",
-      icon: "📊",
+      icon: "📅",
       action: () => navigate("/historial")
     },
     {
@@ -32,8 +32,8 @@ const VehicleMenu = () => {
       action: () => navigate("/patio")
     },
     {
-      title: "Documentos",
-      icon: "🗂️",
+      title: "Excel",
+      icon: "🧾",
       action: () => {
         const token = localStorage.getItem("token");
         fetch("http://localhost:8080/api/vehicles/download", {

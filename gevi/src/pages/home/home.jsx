@@ -5,28 +5,29 @@ import './home.css';
 const Home = () => {
   const navigate = useNavigate();
 
-//LISTA DE MODULOS DISPONIBL EN EL MENU PRINCIPAL
-  const modules = [
+  // ===== Módulos disponibles ===== 
+  const availableModules = [
     {
-      title: "Vehiculos",
-      icon: "🚙",
-      action: () => navigate("/vehiculos-menu") 
+      title: "Vehículos",         
+      icon: "🚙",                 
+      onClick: () => navigate("/vehiculos-menu")
     },
     {
       title: "TP'S y Lectores",
       icon: "📇📡",
-      action: () => navigate("/tps-lectores-menu")
+      onClick: () => navigate("/tps-lectores-menu")
     }
   ];
 
+  // ===== Renderizado =====
   return (
     <div className="homeContainer">
       <main className="modulesContainer">
-        {modules.map((module, index) => (
+        {availableModules.map((module, index) => (
           <div
             key={index}
             className="moduleCard"
-            onClick={module.action}
+            onClick={module.onClick}
           >
             <div className="moduleIcon">{module.icon}</div>
             <h3 className="moduleTitle">{module.title}</h3>

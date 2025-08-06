@@ -52,7 +52,7 @@ function App() {
         <Route path="/reportar-tp-lector"
           element={<ProtectedRoute><Layout><DeviceReport /> </Layout></ProtectedRoute>} />
 
-        <Route path="/tps'lectotres-defectuosos"
+        <Route path="/tps-lectores-defectuosos"
           element={<ProtectedRoute><Layout><DeviceDamaged /> </Layout></ProtectedRoute>} />
 
       </Routes>

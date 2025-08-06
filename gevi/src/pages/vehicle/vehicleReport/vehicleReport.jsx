@@ -12,7 +12,6 @@ const VehicleReport = () => {
     placa: '',
     estadoActual: '',
     kilometrajeActual: '',
-    fallaActual: '',
     nuevoEstado: '',
     tipoFalla: '',
     kilometraje: '',
@@ -77,7 +76,6 @@ const VehicleReport = () => {
             placa: match.badge,
             estadoActual: match.status,
             kilometrajeActual: match.mileage,
-            fallaActual: match.fail || '',
             nuevoEstado: '',
             tipoFalla: '',
             kilometraje: '',
@@ -118,7 +116,6 @@ const VehicleReport = () => {
       placa: vehicle.badge,
       estadoActual: vehicle.status,
       kilometrajeActual: vehicle.mileage,
-      fallaActual: vehicle.fail || '',
       nuevoEstado: '',
       tipoFalla: '',
       kilometraje: '',
@@ -147,7 +144,6 @@ const VehicleReport = () => {
       placa: '',
       estadoActual: '',
       kilometrajeActual: '',
-      fallaActual: '',
       nuevoEstado: '',
       tipoFalla: '',
       kilometraje: '',
@@ -163,7 +159,7 @@ const VehicleReport = () => {
       case "OPERANDO_CON_FALLA":
         return "OPERANDO CON FALLA";
       case "INDISPONIBLE":
-        return "INDISPOONIBLE";
+        return "INDISPONIBLE";
       default:
         return statusEnum;
     }
@@ -267,9 +263,6 @@ const VehicleReport = () => {
               <p><strong>Placa:</strong> {formData.placa}</p>
               <p><strong>Estado Actual:</strong> {formData.estadoActual}</p>
               <p><strong>Kilometraje Actual:</strong> {Number(formData.kilometrajeActual).toLocaleString()} km</p>
-              {(formData.estadoActual === 'OPERANDO CON FALLA' || formData.estadoActual === 'INDISPONIBLE') && (
-                <p><strong>Falla Actual:</strong> {formData.fallaActual || 'No registrada'}</p>
-              )}
             </div>
 
             {/* Selección de nuevo estado */}

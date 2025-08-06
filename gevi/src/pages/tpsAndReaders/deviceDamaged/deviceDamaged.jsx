@@ -3,12 +3,13 @@ import axios from 'axios';
 import './deviceDamaged.css';
 
 const DamagedDevices = () => {
+  // ===== Estados principales =====
   const [damagedDevices, setDamagedDevices] = useState([]);
   const [timers, setTimers] = useState({});
   const [searchTerm, setSearchTerm] = useState('');
   const [suggestions, setSuggestions] = useState([]);
 
-  // Obtener dispositivos defectuosos desde el backend
+  // ===== Obtener dispositivos defectuosos =====
   useEffect(() => {
     const fetchDevices = async () => {
       try {
@@ -25,25 +26,25 @@ const DamagedDevices = () => {
     fetchDevices();
   }, []);
 
-  // Calcular y actualizar cronómetros por dispositivo
+  // ===== Cronómetro dinámico =====
   useEffect(() => {
     const interval = setInterval(() => {
       const newTimers = {};
 
       damagedDevices.forEach(device => {
-        const diff = Date.now() - new Date(device.reportDate).getTime();
-        const totalSeconds = Math.floor(diff / 1000);
+        const timeDiff = Date.now() - new Date(device.reportDate).getTime();
+        const totalSeconds = Math.floor(timeDiff / 1000);
 
         const days = Math.floor(totalSeconds / (60 * 60 * 24));
         const hours = Math.floor((totalSeconds % (60 * 60 * 24)) / (60 * 60));
         const minutes = Math.floor((totalSeconds % (60 * 60)) / 60);
         const seconds = totalSeconds % 60;
 
-        let timeString = '';
-        if (days > 0) timeString += `${days}d `;
-        timeString += `${hours}h ${minutes}m ${seconds}s`;
+        let formattedTime = '';
+        if (days > 0) formattedTime += `${days}d `;
+        formattedTime += `${hours}h ${minutes}m ${seconds}s`;
 
-        newTimers[device.serialNumber] = timeString;
+        newTimers[device.serialNumber] = formattedTime;
       });
 
       setTimers(newTimers);
@@ -52,7 +53,7 @@ const DamagedDevices = () => {
     return () => clearInterval(interval);
   }, [damagedDevices]);
 
-  // Manejar cambios en el input de búsqueda
+  // ===== Búsqueda por agencia =====
   const handleSearchChange = (e) => {
     const value = e.target.value;
     setSearchTerm(value);
@@ -70,40 +71,37 @@ const DamagedDevices = () => {
     setSuggestions(uniqueSuggestions);
   };
 
-  // Selección de sugerencia
   const handleSelectSuggestion = (text) => {
     setSearchTerm(text);
     setSuggestions([]);
   };
 
-  // Limpiar búsqueda
   const handleClearSearch = () => {
     setSearchTerm('');
     setSuggestions([]);
   };
 
-  // Filtrar dispositivos por agencia
+  // ===== Filtrado =====
   const filteredDevices = damagedDevices.filter(device =>
     (device.workCenter || '').toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  // Formato para tipo de dispositivo
+  // ===== Formateo del tipo de dispositivo =====
   const formatDeviceType = (type) => {
-  if (!type) return '';
-  return type
-    .toLowerCase()
-    .split('_')
-    .map((word, index) =>
-      index === 0 ? word.toUpperCase() : word.toUpperCase()
-    )
-    .join(' ');
-};
+    if (!type) return '';
+    return type
+      .toLowerCase()
+      .split('_')
+      .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+      .join(' ');
+  };
 
+  // ===== Renderizado =====
   return (
     <div className="damagedDeviceContainer">
       <h1>Dispositivos Defectuosos</h1>
 
-      {/* Sección de búsqueda */}
+      {/* Búsqueda por agencia */}
       <div className="searchBox">
         <label className="searchLabel">Buscar por agencia:</label>
         <div className="searchInputGroup">
@@ -135,17 +133,19 @@ const DamagedDevices = () => {
         </div>
       </div>
 
-      {/* Lista de dispositivos */}
+      {/* Lista de tarjetas de dispositivos */}
       <div className="deviceGrid">
         {filteredDevices.map(device => (
           <div key={device.serialNumber} className="deviceCard">
             <h3>
-             {formatDeviceType(device.deviceType)} - {device.serialNumber}
+              {formatDeviceType(device.deviceType)} - {device.serialNumber}
             </h3>
             <p><strong>Centro de trabajo:</strong> {device.workCenter}</p>
             <p><strong>Falla:</strong> {device.failType}</p>
-            <p><strong>Tiempo transcurrido:</strong> 
-            <span className="statusBadge timer">{timers[device.serialNumber] || 'Calculando...'}</span></p>
+            <p>
+              <strong>Tiempo transcurrido:</strong>{' '}
+              <span className="statusBadge timer">{timers[device.serialNumber] || 'Calculando...'}</span>
+            </p>
           </div>
         ))}
       </div>

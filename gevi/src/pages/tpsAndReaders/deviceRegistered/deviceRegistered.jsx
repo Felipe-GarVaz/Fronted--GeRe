@@ -3,72 +3,75 @@ import axios from 'axios';
 import './deviceRegistered.css';
 
 const RegisteredDevice = () => {
-  // Estado para los datos obtenidos del backend
-  const [tpsReaders, setTpsReaders] = useState([]);
+  // ===== Estados principales =====
+  const [devicesByAgency, setDevicesByAgency] = useState([]);
+  const [searchTerm, setSearchTerm] = useState('');
 
-  // Estado para filtro por agencia
-  const [filter, setFilter] = useState('');
-
-  // Fetch inicial al montar el componente
+  // ===== Cargar datos del backend =====
   useEffect(() => {
     const token = localStorage.getItem("token");
 
     axios.get("http://localhost:8080/api/device", {
-      headers: {
-        Authorization: `Bearer ${token}`
-      }
+      headers: { Authorization: `Bearer ${token}` }
     })
       .then(response => {
-        setTpsReaders(response.data);
+        setDevicesByAgency(response.data);
       })
       .catch(error => {
         console.error("Error al obtener dispositivos:", error);
       });
   }, []);
 
-  const handleFilterChange = (e) => setFilter(e.target.value);
+  // ===== Filtro por agencia =====
+  const handleSearchChange = (event) => setSearchTerm(event.target.value);
 
-  // Filtrar por nombre de agencia
-  const filtered = tpsReaders.filter(item =>
-    item.workCenter.toLowerCase().includes(filter.toLowerCase())
+  const filteredDevices = devicesByAgency.filter(device =>
+    device.workCenter.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  // Calcular totales dinámicos
-  const totals = filtered.reduce((acc, item) => ({
-    tpNewland: acc.tpNewland + item.tpNewland,
-    tpNewlandDamaged: acc.tpNewlandDamaged + item.tpNewlandDamaged,
-    readerNewland: acc.readerNewland + item.readerNewland,
-    readerNewlandDamaged: acc.readerNewlandDamaged + item.readerNewlandDamaged,
-    tpDolphin9900: acc.tpDolphin9900 + item.tpDolphin9900,
-    tpDolphin9900Damaged: acc.tpDolphin9900Damaged + item.tpDolphin9900Damaged,
-    readerDolphin9900: acc.readerDolphin9900 + item.readerDolphin9900,
-    readerDolphin9900Damaged: acc.readerDolphin9900Damaged + item.readerDolphin9900Damaged,
+  // ===== Totales dinámicos =====
+  const totals = filteredDevices.reduce((acc, device) => ({
+    tpNewland: acc.tpNewland + device.tpNewland,
+    tpNewlandDamaged: acc.tpNewlandDamaged + device.tpNewlandDamaged,
+    readerNewland: acc.readerNewland + device.readerNewland,
+    readerNewlandDamaged: acc.readerNewlandDamaged + device.readerNewlandDamaged,
+    tpDolphin9900: acc.tpDolphin9900 + device.tpDolphin9900,
+    tpDolphin9900Damaged: acc.tpDolphin9900Damaged + device.tpDolphin9900Damaged,
+    readerDolphin9900: acc.readerDolphin9900 + device.readerDolphin9900,
+    readerDolphin9900Damaged: acc.readerDolphin9900Damaged + device.readerDolphin9900Damaged,
   }), {
     tpNewland: 0, tpNewlandDamaged: 0,
     readerNewland: 0, readerNewlandDamaged: 0,
     tpDolphin9900: 0, tpDolphin9900Damaged: 0,
-    readerDolphin9900: 0, readerDolphin9900Damaged: 0
+    readerDolphin9900: 0, readerDolphin9900Damaged: 0,
   });
 
-  const totalDevices = totals.tpNewland + totals.readerNewland + totals.tpDolphin9900 + totals.readerDolphin9900;
-  const totalDamaged = totals.tpNewlandDamaged + totals.readerNewlandDamaged + totals.tpDolphin9900Damaged + totals.readerDolphin9900Damaged;
+  const totalDevices =
+    totals.tpNewland + totals.readerNewland + totals.tpDolphin9900 + totals.readerDolphin9900;
 
+  const totalDamaged =
+    totals.tpNewlandDamaged + totals.readerNewlandDamaged +
+    totals.tpDolphin9900Damaged + totals.readerDolphin9900Damaged;
+
+  // ===== Renderizado =====
   return (
     <div className="deviceListContainer">
       <h1>TPS y Lectores Registrados</h1>
 
+      {/* Filtro por agencia */}
       <div className="filtersSection">
         <div className="searchGroup">
           <label>Buscar por Agencia:</label>
           <input
             type="text"
             placeholder="Ej: Teziutlan"
-            value={filter}
-            onChange={handleFilterChange}
+            value={searchTerm}
+            onChange={handleSearchChange}
           />
         </div>
       </div>
 
+      {/* Contadores */}
       <div className="DeviceCounters">
         <div className="counterBox Total">
           <strong>Total Dispositivos:</strong> {totalDevices}
@@ -94,6 +97,7 @@ const RegisteredDevice = () => {
         </div>
       </div>
 
+      {/* Tabla principal */}
       <div className="tableContainer">
         <table>
           <thead>
@@ -106,14 +110,14 @@ const RegisteredDevice = () => {
             </tr>
           </thead>
           <tbody>
-            {filtered.length > 0 ? (
-              filtered.map((tp, index) => (
+            {filteredDevices.length > 0 ? (
+              filteredDevices.map((device, index) => (
                 <tr key={index}>
-                  <td>{tp.workCenter}</td>
-                  <td>{tp.tpNewland}</td>
-                  <td>{tp.readerNewland}</td>
-                  <td>{tp.tpDolphin9900}</td>
-                  <td>{tp.readerDolphin9900}</td>
+                  <td>{device.workCenter}</td>
+                  <td>{device.tpNewland}</td>
+                  <td>{device.readerNewland}</td>
+                  <td>{device.tpDolphin9900}</td>
+                  <td>{device.readerDolphin9900}</td>
                 </tr>
               ))
             ) : (

@@ -80,7 +80,7 @@ input {
   background-color: #00352d;
 }
 
-.loginContainer .error-message {
+.loginContainer .errorMessage {
   color: #d32f2f;
   font-weight: bold;
   text-align: center;

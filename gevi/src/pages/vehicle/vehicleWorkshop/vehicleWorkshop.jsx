@@ -3,12 +3,13 @@ import axios from 'axios';
 import './vehicleWorkshop.css';
 
 const WorkshopVehicle = () => {
-  const [vehiclesInWorkshop, setVehiclesInWorkshop] = useState([]);
+  // ===== Estados =====
+  const [vehicles, setVehicles] = useState([]);
   const [timers, setTimers] = useState({});
   const [searchTerm, setSearchTerm] = useState('');
   const [suggestions, setSuggestions] = useState([]);
 
-  // Obtener vehículos en taller desde el backend
+  // ===== Obtener vehículos en taller =====
   useEffect(() => {
     const fetchVehicles = async () => {
       try {
@@ -16,7 +17,7 @@ const WorkshopVehicle = () => {
         const response = await axios.get('http://localhost:8080/api/workshop/vehicles', {
           headers: { Authorization: `Bearer ${token}` }
         });
-        setVehiclesInWorkshop(response.data);
+        setVehicles(response.data);
       } catch (error) {
         console.error('Error al obtener vehículos del taller:', error);
       }
@@ -25,69 +26,60 @@ const WorkshopVehicle = () => {
     fetchVehicles();
   }, []);
 
-  // Calcular y actualizar temporizadores por vehículo
+  // ===== Cronómetro dinámico por vehículo =====
   useEffect(() => {
     const interval = setInterval(() => {
-      const newTimers = {};
+      const updatedTimers = {};
 
-      vehiclesInWorkshop.forEach(vehicle => {
-        const diff = Date.now() - new Date(vehicle.reportDate).getTime();
-        const totalSeconds = Math.floor(diff / 1000);
+      vehicles.forEach(vehicle => {
+        const secondsElapsed = Math.floor((Date.now() - new Date(vehicle.reportDate).getTime()) / 1000);
 
-        const days = Math.floor(totalSeconds / (60 * 60 * 24));
-        const hours = Math.floor((totalSeconds % (60 * 60 * 24)) / (60 * 60));
-        const minutes = Math.floor((totalSeconds % (60 * 60)) / 60);
-        const seconds = totalSeconds % 60;
+        const days = Math.floor(secondsElapsed / 86400);
+        const hours = Math.floor((secondsElapsed % 86400) / 3600);
+        const minutes = Math.floor((secondsElapsed % 3600) / 60);
+        const seconds = secondsElapsed % 60;
 
-        let timeString = '';
-        if (days > 0) timeString += `${days}d `;
-        timeString += `${hours}h ${minutes}m ${seconds}s`;
-
-        newTimers[vehicle.id] = timeString;
+        const timeFormatted = `${days > 0 ? `${days}d ` : ''}${hours}h ${minutes}m ${seconds}s`;
+        updatedTimers[vehicle.id] = timeFormatted;
       });
 
-      setTimers(newTimers);
+      setTimers(updatedTimers);
     }, 1000);
 
     return () => clearInterval(interval);
-  }, [vehiclesInWorkshop]);
+  }, [vehicles]);
 
-  // Manejar cambios en el input de búsqueda
+  // ===== Búsqueda y sugerencias =====
   const handleSearchChange = (e) => {
     const value = e.target.value;
     setSearchTerm(value);
 
-    if (value.trim() === '') {
+    if (!value.trim()) {
       setSuggestions([]);
       return;
     }
 
-    const matches = vehiclesInWorkshop.filter(vehicle =>
+    const filtered = vehicles.filter(vehicle =>
       vehicle.economical.toLowerCase().includes(value.toLowerCase()) ||
       vehicle.badge.toLowerCase().includes(value.toLowerCase())
     );
 
-    const uniqueSuggestions = Array.from(
-      new Set(matches.map(vehicle => `${vehicle.economical} - ${vehicle.badge}`))
-    );
-
-    setSuggestions(uniqueSuggestions);
+    const unique = Array.from(new Set(filtered.map(v => `${v.economical} - ${v.badge}`)));
+    setSuggestions(unique);
   };
 
-  // Selección de sugerencia
   const handleSelectSuggestion = (text) => {
     setSearchTerm(text);
     setSuggestions([]);
   };
 
-  // Limpiar búsqueda
   const handleClearSearch = () => {
     setSearchTerm('');
     setSuggestions([]);
   };
 
-  // Filtrar vehículos por término de búsqueda
-  const filteredVehicles = vehiclesInWorkshop.filter(vehicle => {
+  // ===== Filtro de vehículos según búsqueda =====
+  const filteredVehicles = vehicles.filter(vehicle => {
     const query = searchTerm.toLowerCase();
     return (
       vehicle.economical.toLowerCase().includes(query) ||
@@ -96,6 +88,7 @@ const WorkshopVehicle = () => {
     );
   });
 
+  // ===== Renderizado =====
   return (
     <div className="workshopContainer">
       <h1>Vehículos en Taller</h1>
@@ -132,14 +125,16 @@ const WorkshopVehicle = () => {
         </div>
       </div>
 
-      {/* Lista de vehículos */}
+      {/* Lista de tarjetas de vehículos */}
       <div className="vehicleGrid">
         {filteredVehicles.map(vehicle => (
           <div key={vehicle.id} className="vehicleCard">
             <h3>{vehicle.economical} - {vehicle.badge}</h3>
             <p><strong>Falla:</strong> {vehicle.fail}</p>
-            <p><strong>Tiempo en taller:</strong>
-              <span className="statusBadge timer">{timers[vehicle.id] || 'Calculando...'}</span>
+            <p><strong>Tiempo en taller:</strong>{' '}
+              <span className="statusBadge timer">
+                {timers[vehicle.id] || 'Calculando...'}
+              </span>
             </p>
           </div>
         ))}

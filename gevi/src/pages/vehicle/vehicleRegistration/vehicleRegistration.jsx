@@ -1,13 +1,10 @@
-// src/components/RegisteredVehicles.jsx
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import './vehicleRegistration.css';
 
 const RegisteredVehicles = () => {
-    // Estado principal de vehículos
+    // ===== Estados principales =====
     const [vehicles, setVehicles] = useState([]);
-
-    // Opciones dinámicas de filtros
     const [filterOptions, setFilterOptions] = useState({
         centroTrabajo: [],
         proceso: [],
@@ -15,8 +12,6 @@ const RegisteredVehicles = () => {
         propiedad: []
     });
 
-
-    // Estado local de filtros activos
     const [filters, setFilters] = useState({
         centroTrabajo: '',
         proceso: '',
@@ -25,7 +20,7 @@ const RegisteredVehicles = () => {
         busqueda: ''
     });
 
-    // Obtener opciones de filtros
+    // ===== Obtener filtros =====
     useEffect(() => {
         const fetchFilterOptions = async () => {
             try {
@@ -41,7 +36,7 @@ const RegisteredVehicles = () => {
         fetchFilterOptions();
     }, []);
 
-    // Obtener todos los vehículos
+    // ===== Obtener vehículos =====
     useEffect(() => {
         const fetchVehicles = async () => {
             try {
@@ -57,19 +52,23 @@ const RegisteredVehicles = () => {
         fetchVehicles();
     }, []);
 
-    // Actualiza el estado de un filtro
+    // ===== Cambiar filtros =====
     const handleFilterChange = (e) => {
         const { name, value } = e.target;
         setFilters((prev) => ({ ...prev, [name]: value }));
     };
 
-    // Resetea todos los filtros
     const resetFilters = () => {
-        setFilters({ centroTrabajo: '', proceso: '', estado: '', propiedad: '', busqueda: '' });
+        setFilters({
+            centroTrabajo: '',
+            proceso: '',
+            estado: '',
+            propiedad: '',
+            busqueda: ''
+        });
     };
 
-
-    // Filtrado de vehículos en cliente
+    // ===== Filtrar vehículos =====
     const filteredVehicles = vehicles.filter(vehicle => (
         (!filters.centroTrabajo || vehicle.workCenterId.toString() === filters.centroTrabajo) &&
         (!filters.proceso || vehicle.processId.toString() === filters.proceso) &&
@@ -78,16 +77,16 @@ const RegisteredVehicles = () => {
         (!filters.busqueda || vehicle.economical.toLowerCase().includes(filters.busqueda.toLowerCase()))
     ));
 
-    // Formatea estado
     const formatStatus = (status) => {
         return status === 'OPERANDO_CON_FALLA' ? 'OPERANDO CON FALLA' : status;
     };
 
+    // ===== Renderizado =====
     return (
         <div className="vehicleListContainer">
             <h1>Vehículos Registrados</h1>
 
-            {/* Sección de filtros */}
+            {/* Filtros */}
             <div className="filtersSection">
                 <div className="searchGroup">
                     <label>Buscar por Económico:</label>
@@ -102,17 +101,16 @@ const RegisteredVehicles = () => {
 
                 {['centroTrabajo', 'proceso', 'estado', 'propiedad'].map(key => (
                     <div className="filterGroup" key={key}>
-                        <label>{
-                            key === 'centroTrabajo' ? 'Centro de Trabajo'
-                                : key === 'proceso' ? 'Proceso'
-                                    : key === 'estado' ? 'Estado'
-                                        : 'Propiedad'
-                        }:</label>
-                        <select
-                            name={key}
-                            value={filters[key]}
-                            onChange={handleFilterChange}
-                        >
+                        <label>
+                            {key === 'centroTrabajo'
+                                ? 'Centro de Trabajo'
+                                : key === 'proceso'
+                                    ? 'Proceso'
+                                    : key === 'estado'
+                                        ? 'Estado'
+                                        : 'Propiedad'}
+                            :</label>
+                        <select name={key} value={filters[key]} onChange={handleFilterChange}>
                             <option value="">Todos</option>
                             {filterOptions[key].map(option => (
                                 <option key={option.id} value={option.id}>{option.name}</option>
@@ -126,7 +124,7 @@ const RegisteredVehicles = () => {
                 </button>
             </div>
 
-            {/* Contadores de estado */}
+            {/* Contadores */}
             <div className="vehicleCounters">
                 <div className="counterBox Disponible">
                     <strong>Disponible:</strong> {filteredVehicles.filter(v => v.status === 'DISPONIBLE').length}

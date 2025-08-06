@@ -1,80 +1,85 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
-import '../../home/home.css';
+import "../../home/home.css";
 
 const TpsReadersMenu = () => {
   const navigate = useNavigate();
 
-  const modules = [
+  // ===== Lista de módulos =====
+  const availableModules = [
     {
       title: "TP'S y Lectores Registrados",
       icon: "📟",
-      action: () => navigate("/tps-lectores-registrados"),
+      onClick: () => navigate("/tps-lectores-registrados"),
     },
     {
       title: "Reportar TP o Lector",
       icon: "📝",
-      action: () => navigate("/reportar-tp-lector"),
+      onClick: () => navigate("/reportar-tp-lector"),
     },
     {
       title: "TPS y Lectores Dañados",
       icon: "❗",
-      action: () => navigate("/tps'lectotres-defectuosos"),
+      onClick: () => navigate("/tps-lectores-defectuosos"),
     },
     {
       title: "Excel",
       icon: "🧾",
-      action: () => {
-        const token = localStorage.getItem("token");
-        fetch("http://localhost:8080/api/device/download", {
-          method: "GET",
-          headers: {
-            Authorization: `Bearer ${token}`
-          }
-        })
-          .then(response => {
-            if (!response.ok) {
-              throw new Error("Error al descargar el archivo");
-            }
-            return response.blob();
-          })
-          .then(blob => {
-            const url = window.URL.createObjectURL(blob);
-            const link = document.createElement("a");
-            link.href = url;
-
-            // Generar nombre con fecha actual
-            const today = new Date();
-            const year = today.getFullYear();
-            const month = String(today.getMonth() + 1).padStart(2, '0');
-            const day = String(today.getDate()).padStart(2, '0');
-            const filename = `dispositivos_${year}-${month}-${day}.xlsx`;
-
-            link.setAttribute("download", filename);
-            document.body.appendChild(link);
-            link.click();
-            link.remove();
-          })
-          .catch(error => {
-            console.error("Fallo la descarga del Excel:", error);
-          });
-      }
+      onClick: () => downloadExcelFile(),
     }
   ];
 
+  // ===== Descarga de Excel =====
+  const downloadExcelFile = () => {
+    const token = localStorage.getItem("token");
+
+    fetch("http://localhost:8080/api/device/download", {
+      method: "GET",
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    })
+      .then(response => {
+        if (!response.ok) {
+          throw new Error("Error al descargar el archivo");
+        }
+        return response.blob();
+      })
+      .then(blob => {
+        const url = window.URL.createObjectURL(blob);
+        const link = document.createElement("a");
+
+        const today = new Date();
+        const year = today.getFullYear();
+        const month = String(today.getMonth() + 1).padStart(2, '0');
+        const day = String(today.getDate()).padStart(2, '0');
+        const filename = `dispositivos_${year}-${month}-${day}.xlsx`;
+
+        link.href = url;
+        link.setAttribute("download", filename);
+        document.body.appendChild(link);
+        link.click();
+        link.remove();
+      })
+      .catch(error => {
+        console.error("Falló la descarga del Excel:", error);
+      });
+  };
+
+  // ===== Renderizado =====
   return (
     <div className="homeContainer">
       <main className="modulesContainer">
-        {modules.map((module, index) => (
+        {availableModules.map((module, index) => (
           <div
             key={index}
             className="moduleCard"
-            onClick={module.action}
+            onClick={module.onClick}
             role="button"
             tabIndex={0}
             onKeyDown={(e) => {
               if (e.key === "Enter" || e.key === " ") {
-                module.action();
+                module.onClick();
               }
             }}
             aria-label={`Ir a ${module.title}`}

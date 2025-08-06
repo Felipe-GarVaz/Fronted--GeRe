@@ -3,19 +3,12 @@ import axios from 'axios';
 import './deviceReport.css';
 
 const ReportTPSReaders = () => {
-  const [workCenter, setWorkCenter] = useState([]);
+  // ===== Estados principales =====
+  const [workCenters, setWorkCenters] = useState([]);
   const [devices, setDevices] = useState([]);
   const [failTypes, setFailTypes] = useState([]);
   const [deviceInfo, setDeviceInfo] = useState(null);
   const [showModal, setShowModal] = useState(false);
-
-  // Lista estática basada en los valores ENUM reales
-  const deviceTypes = [
-    { label: 'TP NEWLAND', value: 'TP_NEWLAND' },
-    { label: 'LECTOR NEWLAND', value: 'LECTOR_NEWLAND' },
-    { label: 'TP DOLPHIN 9900', value: 'TP_DOLPHIN_9900' },
-    { label: 'LECTOR DOLPHIN 9900', value: 'LECTOR_DOLPHIN_9900' }
-  ];
 
   const [formData, setFormData] = useState({
     workCenter: '',
@@ -26,14 +19,22 @@ const ReportTPSReaders = () => {
     newStatus: ''
   });
 
-  // Carga agencias y tipos de falla
+  // ===== Tipos de dispositivo estáticos =====
+  const deviceTypes = [
+    { label: 'TP NEWLAND', value: 'TP_NEWLAND' },
+    { label: 'LECTOR NEWLAND', value: 'LECTOR_NEWLAND' },
+    { label: 'TP DOLPHIN 9900', value: 'TP_DOLPHIN_9900' },
+    { label: 'LECTOR DOLPHIN 9900', value: 'LECTOR_DOLPHIN_9900' }
+  ];
+
+  // ===== Carga inicial de agencias y fallas =====
   useEffect(() => {
     const token = localStorage.getItem("token");
 
     axios.get("http://localhost:8080/api/workCenter", {
       headers: { Authorization: `Bearer ${token}` }
     })
-      .then(res => setWorkCenter(res.data))
+      .then(res => setWorkCenters(res.data))
       .catch(err => console.error("Error al cargar agencias:", err));
 
     axios.get("http://localhost:8080/api/failTypeDevice", {
@@ -43,19 +44,17 @@ const ReportTPSReaders = () => {
       .catch(err => console.error("Error al cargar tipos de falla:", err));
   }, []);
 
-  // Carga dispositivos según tipo y agencia seleccionados
+  // ===== Cargar dispositivos por agencia y tipo =====
   useEffect(() => {
     const token = localStorage.getItem("token");
 
     if (formData.deviceType && formData.workCenter) {
-      axios.get(`http://localhost:8080/api/device/serialNumber`, {
+      axios.get("http://localhost:8080/api/device/serialNumber", {
         params: {
           deviceType: formData.deviceType,
           workCenter: formData.workCenter
         },
-        headers: {
-          Authorization: `Bearer ${token}`
-        }
+        headers: { Authorization: `Bearer ${token}` }
       })
         .then(res => setDevices(res.data))
         .catch(err => {
@@ -67,7 +66,7 @@ const ReportTPSReaders = () => {
     }
   }, [formData.deviceType, formData.workCenter]);
 
-  // Manejo de cambios de campos
+  // ===== Manejo de cambios en campos =====
   const handleChange = (e) => {
     const { name, value } = e.target;
 
@@ -77,20 +76,23 @@ const ReportTPSReaders = () => {
     }));
 
     if (name === 'serialNumber') {
-      const selected = devices.find(d => d.serialNumber === value);
-      setDeviceInfo(selected || null);
+      const selectedDevice = devices.find(d => d.serialNumber === value);
+      setDeviceInfo(selectedDevice || null);
 
-      // Si el dispositivo es ACTIVO, limpiamos newStatus
-      setFormData(prev => ({ ...prev, newStatus: '' }));
+      // Limpiar estado si es ACTIVO
+      setFormData(prev => ({
+        ...prev,
+        newStatus: ''
+      }));
     }
   };
 
-  // Enviar reporte al backend
+  // ===== Envío del reporte =====
   const handleSubmit = async (e) => {
     e.preventDefault();
     const token = localStorage.getItem("token");
 
-    const selectedWorkCenter = workCenter.find(wc => wc.name === formData.workCenter);
+    const selectedWorkCenter = workCenters.find(wc => wc.name === formData.workCenter);
     const workCenterId = selectedWorkCenter?.id || null;
 
     const failTypeDeviceId = formData.failType === 'otros'
@@ -105,7 +107,7 @@ const ReportTPSReaders = () => {
       personalizedFailure: formData.failType === 'otros' ? formData.personalizedFailure : '',
       newStatus: deviceInfo?.status === 'DEFECTUOSO' ? formData.newStatus : null
     };
-    console.log("Payload enviado al backend:", payload);
+
     try {
       await axios.post("http://localhost:8080/api/deviceReport", payload, {
         headers: { Authorization: `Bearer ${token}` }
@@ -113,15 +115,15 @@ const ReportTPSReaders = () => {
 
       setShowModal(true);
 
-      // Reset
+      // Reset del formulario
       setFormData({
         workCenter: '',
         deviceType: '',
         serialNumber: '',
         failType: '',
-        personalizedFailure: ''
+        personalizedFailure: '',
+        newStatus: ''
       });
-
 
       setDevices([]);
       setDeviceInfo(null);
@@ -131,24 +133,25 @@ const ReportTPSReaders = () => {
     }
   };
 
+  // ===== Renderizado =====
   return (
-    <div className="device-report-container">
+    <div className="deviceReportContainer">
       <h1>Reportar Daño de TPS o Lector</h1>
 
-      <form onSubmit={handleSubmit} className="device-report-form">
+      <form onSubmit={handleSubmit} className="deviceReportForm">
         {/* Agencia */}
-        <div className="form-group">
+        <div className="formGroup">
           <label>Agencia:</label>
           <select name="workCenter" value={formData.workCenter} onChange={handleChange} required>
             <option value="">Seleccione una agencia</option>
-            {workCenter.map((center) => (
+            {workCenters.map(center => (
               <option key={center.id} value={center.name}>{center.name}</option>
             ))}
           </select>
         </div>
 
         {/* Tipo de dispositivo */}
-        <div className="form-group">
+        <div className="formGroup">
           <label>Tipo de dispositivo:</label>
           <select name="deviceType" value={formData.deviceType} onChange={handleChange} required>
             <option value="">Seleccione tipo</option>
@@ -159,7 +162,7 @@ const ReportTPSReaders = () => {
         </div>
 
         {/* Número de serie */}
-        <div className="form-group">
+        <div className="formGroup">
           <label>Número de serie:</label>
           <select name="serialNumber" value={formData.serialNumber} onChange={handleChange} required>
             <option value="">Seleccione número de serie</option>
@@ -168,20 +171,20 @@ const ReportTPSReaders = () => {
             ))}
           </select>
 
-          {/* Estado actual del dispositivo */}
+          {/* Estado actual */}
           {deviceInfo && (
-            <p style={{ marginTop: '8px', fontWeight: '500' }}>
+            <p className="deviceStatus">
               <strong>Estado actual:</strong>{' '}
-              <span className={deviceInfo.status === 'DEFECTUOSO' ? 'estado-dañado' : 'estado-activo'}>
+              <span className={deviceInfo.status === 'DEFECTUOSO' ? 'statusFaulty' : 'statusActive'}>
                 {deviceInfo.status}
               </span>
             </p>
           )}
         </div>
 
-        {/* Si el estado actual es DEFECTUOSO, mostrar opción para cambiar a ACTIVO */}
-        {deviceInfo && deviceInfo.status === 'DEFECTUOSO' && (
-          <div className="form-group">
+        {/* Cambio a ACTIVO si está defectuoso */}
+        {deviceInfo?.status === 'DEFECTUOSO' && (
+          <div className="formGroup">
             <label>Cambiar estado a:</label>
             <select name="newStatus" value={formData.newStatus} onChange={handleChange} required>
               <option value="">Seleccione nuevo estado</option>
@@ -190,14 +193,14 @@ const ReportTPSReaders = () => {
           </div>
         )}
 
-        {/* Mostrar falla detectada solo si el estado no es DEFECTUOSO */}
-        {!(deviceInfo && deviceInfo.status === 'DEFECTUOSO') && (
+        {/* Selección de falla (si no está defectuoso) */}
+        {deviceInfo?.status !== 'DEFECTUOSO' && (
           <>
-            <div className="form-group">
+            <div className="formGroup">
               <label>Falla detectada:</label>
               <select name="failType" value={formData.failType} onChange={handleChange} required>
                 <option value="">Seleccione la falla</option>
-                {failTypes.map((fail) => (
+                {failTypes.map(fail => (
                   <option key={fail.id} value={fail.name}>{fail.name}</option>
                 ))}
                 <option value="otros">Otros...</option>
@@ -205,7 +208,7 @@ const ReportTPSReaders = () => {
             </div>
 
             {formData.failType === 'otros' && (
-              <div className="form-group">
+              <div className="formGroup">
                 <label>Especifique la falla:</label>
                 <input
                   type="text"
@@ -220,7 +223,7 @@ const ReportTPSReaders = () => {
           </>
         )}
 
-        <button type="submit" className="submit-btn">Enviar Reporte</button>
+        <button type="submit" className="submitBtn">Enviar Reporte</button>
       </form>
 
       {/* Modal de éxito */}
@@ -230,14 +233,11 @@ const ReportTPSReaders = () => {
             <div className="modalIcon">✅</div>
             <h2 className="modalTitle">¡Reporte Enviado!</h2>
             <p className="modalMessage">Tu reporte se ha enviado correctamente.</p>
-            <button onClick={() => setShowModal(false)} className="modalButton">
-              Cerrar
-            </button>
+            <button onClick={() => setShowModal(false)} className="modalButton">Cerrar</button>
           </div>
         </div>
       )}
     </div>
-
   );
 };
 

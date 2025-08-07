@@ -35,7 +35,7 @@ const VehicleMenu = () => {
     {
       title: "Excel",
       icon: "🧾",
-      onClick: () => downloadExcelFile
+      onClick: () => downloadExcelFile(),
     }
   ];
 

@@ -142,9 +142,10 @@ const DamagedDevices = () => {
             </h3>
             <p><strong>Centro de trabajo:</strong> {device.workCenter}</p>
             <p><strong>Falla:</strong> {device.failType}</p>
-            <p>
-              <strong>Tiempo transcurrido:</strong>{' '}
-              <span className="statusBadge timer">{timers[device.serialNumber] || 'Calculando...'}</span>
+            <p><strong>Tiempo transcurrido:</strong>{' '}
+              <span className="statusBadge timer">
+                {timers[device.serialNumber] || 'Calculando...'}
+              </span>
             </p>
           </div>
         ))}

@@ -1,10 +1,9 @@
-// src/components/VehicleReport.jsx
 import React, { useState, useEffect, useRef } from 'react';
 import axios from 'axios';
 import './vehicleReport.css';
 
 const VehicleReport = () => {
-  // Estados principales del formulario
+  // ===== Estados principales =====
   const [vehicles, setVehicles] = useState([]);
   const [failTypes, setFailTypes] = useState([]);
   const [formData, setFormData] = useState({
@@ -25,10 +24,11 @@ const VehicleReport = () => {
   const [showCustomFailInput, setShowCustomFailInput] = useState(false);
   const [mileageError, setMileageError] = useState('');
   const [showModal, setShowModal] = useState(false);
+  const hasSelectedSuggestion = useRef(false);
+
   const statusOptions = ['DISPONIBLE', 'OPERANDO CON FALLA', 'INDISPONIBLE'];
 
-  const hasSelectedSuggestion = useRef(false);
-  // Obtener vehículos y tipos de falla al iniciar
+  // ===== Obtener vehículos y tipos de falla al iniciar =====
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -48,7 +48,7 @@ const VehicleReport = () => {
     fetchData();
   }, []);
 
-  // Buscar sugerencias mientras escribe
+  // ===== Buscar sugerencias mientras escribe =====
   useEffect(() => {
     if (hasSelectedSuggestion.current) {
       hasSelectedSuggestion.current = false;
@@ -91,7 +91,7 @@ const VehicleReport = () => {
     fetchSuggestions();
   }, [searchTerm]);
 
-  // Manejadores del formulario
+  // ===== Manejadores del formulario =====
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
@@ -165,12 +165,12 @@ const VehicleReport = () => {
     }
   };
 
-  //Estados diferentes al actual
+  // =====Estados diferentes al actual =====
   const filteredStatusOptions = statusOptions.filter(
     (estado) => estado !== toReadableStatus(formData.estadoActual)
   );
 
-  // Enviar reporte
+  //===== Enviar reporte =====
   const handleSubmit = async (e) => {
     e.preventDefault();
 
@@ -210,7 +210,7 @@ const VehicleReport = () => {
     }
 
     try {
-      await axios.post("http://localhost:8080/api/reportes", payload, {
+      await axios.post("http://localhost:8080/api/reports", payload, {
         headers: {
           Authorization: `Bearer ${token}`,
           "Content-Type": "application/json"
@@ -226,7 +226,7 @@ const VehicleReport = () => {
     }
   };
 
-  // Render principal
+  //===== Renderizado =====
   return (
     <div className="reportContainer">
       <h1 className="formTitle">Reportar Estado de Vehículo</h1>

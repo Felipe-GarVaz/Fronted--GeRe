@@ -87,7 +87,7 @@ const Login = () => {
 
           {/* Mensaje de error */}
           {errorMessage && (
-            <div className="error-message">{errorMessage}</div>
+            <div className="errorMessage">{errorMessage}</div>
           )}
 
           <button

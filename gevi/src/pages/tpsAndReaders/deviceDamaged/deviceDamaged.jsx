@@ -90,7 +90,7 @@ const DamagedDevices = () => {
   const formatDeviceType = (type) => {
     if (!type) return '';
     return type
-      .toLowerCase()
+      .toUpperCase()
       .split('_')
       .map(word => word.charAt(0).toUpperCase() + word.slice(1))
       .join(' ');

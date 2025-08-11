@@ -8,9 +8,14 @@ const VehicleMenu = () => {
   // ===== Lista de módulos =====
   const vehicleModules = [
     {
-      title: "Agregar Vehiculo",
-      icon: "➕🚗",
+      title: "Agregar Vehículo",
+      icon: "➕",
       onClick: () => navigate("/agregar-vehiculo")
+    },
+    {
+      title: "Eliminar Vehículo",
+      icon: "❌",
+      onClick: () => navigate("/eliminar-vehiculo")
     },
     {
       title: "Vehículos Registrados",
@@ -39,7 +44,7 @@ const VehicleMenu = () => {
     },
     {
       title: "Excel",
-      icon: "🧾",
+      icon: "📋",
       onClick: () => downloadExcelFile(),
     }
   ];

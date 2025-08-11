@@ -14,6 +14,7 @@ import VehicleWorkshop from './pages/vehicle/vehicleWorkshop/vehicleWorkshop';
 import VehicleYard from './pages/vehicle/vehicleYard/vehicleYard'
 import DeviceDamaged from './pages/tpsAndReaders/deviceDamaged/deviceDamaged';
 import VehicleCreate from './pages/vehicle/vehicleCreate/vehicleCreate';
+import VehicleDelete from './pages/vehicle/vehicleDelete/vehicleDelete';
 
 function App() {
   return (
@@ -34,6 +35,9 @@ function App() {
 
         <Route path="/agregar-vehiculo"
           element={<ProtectedRoute><Layout><VehicleCreate /> </Layout></ProtectedRoute>} />
+
+        <Route path="/eliminar-vehiculo"
+          element={<ProtectedRoute><Layout><VehicleDelete /> </Layout></ProtectedRoute>} />
 
         <Route path="/vehiculos-registrados"
           element={<ProtectedRoute><Layout><VehicleRegistration /> </Layout></ProtectedRoute>} />

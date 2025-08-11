@@ -1,27 +1,27 @@
-.reportContainer {
+.createContainer {
   max-width: 800px;
   margin: 0 auto;
   padding: 20px;
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }
 
-h1 {
+.createContainer h1 {
   color: #003366;
   margin-bottom: 20px;
 }
 
-.reportForm {
+.createContainer .reportForm {
   background-color: #f9f9f9;
   padding: 25px;
   border-radius: 8px;
   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
 }
 
-.formGroup {
+.createContainer .formGroup {
   margin-bottom: 20px;
 }
 
-.formGroup label {
+.createContainer .formGroup label {
   display: block;
   margin-bottom: 5px;
   font-weight: 600;
@@ -29,8 +29,8 @@ h1 {
   font-size: 16px;
 }
 
-.formGroup select,
-.formGroup input {
+.createContainer .formGroup select,
+.createContainer .formGroup input {
   width: 100%;
   padding: 10px;
   border: 1px solid #ddd;
@@ -39,12 +39,12 @@ h1 {
   box-sizing: border-box;
 }
 
-.readOnly {
+.createContainer .readOnly {
   background-color: #f0f0f0;
   color: #555;
 }
 
-.submitBtn {
+.createContainer .submitBtn {
   width: 100%;
   padding: 12px;
   background-color: #003366;
@@ -56,18 +56,18 @@ h1 {
   transition: background-color 0.3s;
 }
 
-.submitBtn:hover {
+.createContainer .submitBtn:hover {
   background-color: #002244;
 }
 
-.error {
+.createContainer .error {
   color: red;
   font-size: 0.9rem;
   margin-top: 4px;
 }
 
 /* Modal de éxito */
-.modalOverlay {
+.createContainer .modalOverlay {
   position: fixed;
   top: 0;
   left: 0;
@@ -81,7 +81,7 @@ h1 {
   animation: fadeIn 0.3s ease-in-out;
 }
 
-.modalContent {
+.createContainer .modalContent {
   background: #fff;
   padding: 30px 40px;
   border-radius: 16px;
@@ -92,29 +92,29 @@ h1 {
   animation: scaleIn 0.4s ease;
 }
 
-.modalContent.success {
+.createContainer .modalContent.success {
   border-top: 8px solid #28a745;
 }
 
-.modalIcon {
+.createContainer .modalIcon {
   font-size: 3rem;
   color: #28a745;
   margin-bottom: 15px;
 }
 
-.modalTitle {
+.createContainer .modalTitle {
   font-size: 1.5rem;
   color: #003366;
   margin-bottom: 10px;
 }
 
-.modalMessage {
+.createContainer .modalMessage {
   font-size: 1rem;
   color: #555;
   margin-bottom: 25px;
 }
 
-.modalButton {
+.createContainer .modalButton {
   padding: 10px 25px;
   font-size: 14px;
   background-color: #003366;
@@ -125,7 +125,7 @@ h1 {
   transition: background-color 0.3s ease;
 }
 
-.modalButton:hover {
+.createContainer .modalButton:hover {
   background-color: #002244;
 }
 
@@ -152,11 +152,11 @@ h1 {
 
 /* Responsivo */
 @media (max-width: 600px) {
-  .reportContainer {
+  .createContainer .reportContainer {
     padding: 15px;
   }
 
-  .reportForm {
+  .createContainer .reportForm {
     padding: 15px;
   }
 }

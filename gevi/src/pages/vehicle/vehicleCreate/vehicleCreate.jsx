@@ -116,7 +116,7 @@ const AddVehicle = () => {
   };
 
   return (
-    <div className="reportContainer">
+    <div className="createContainer">
       <h1>Registrar Nuevo Vehículo</h1>
 
       <form onSubmit={handleSubmit} className="reportForm">

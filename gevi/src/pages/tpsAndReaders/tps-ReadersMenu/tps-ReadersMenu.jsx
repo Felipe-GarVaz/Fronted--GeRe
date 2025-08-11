@@ -7,6 +7,16 @@ const TpsReadersMenu = () => {
 
   // ===== Lista de módulos =====
   const availableModules = [
+        {
+      title: "Agregar Dispositivo",
+      icon: "➕",
+      onClick: () => navigate("/agregar-dispositivo")
+    },
+    {
+      title: "Eliminar Dispositivo",
+      icon: "❌",
+      onClick: () => navigate("/eliminar-dispositivo")
+    },
     {
       title: "TP'S y Lectores Registrados",
       icon: "📟",

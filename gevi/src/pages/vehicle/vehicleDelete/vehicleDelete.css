@@ -1,0 +1,193 @@
+.deleteContainer {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 20px;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.deleteContainer h1 {
+  color: #003366;
+  margin-bottom: 20px;
+}
+
+.deleteContainer .reportForm {
+  background-color: #f9f9f9;
+  padding: 25px;
+  border-radius: 8px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+.deleteContainer .formGroup {
+  margin-bottom: 20px;
+  position: relative; /* necesario para el autocompletado */
+}
+
+.deleteContainer .formGroup label {
+  display: block;
+  margin-bottom: 5px;
+  font-weight: 600;
+  color: #003366;
+  font-size: 16px;
+}
+
+.deleteContainer .formGroup input {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 16px;
+  box-sizing: border-box;
+}
+
+.deleteContainer .submitBtn {
+  width: 100%;
+  padding: 12px;
+  background-color: #cc0000; /* rojo para acción de eliminar */
+  color: white;
+  border: none;
+  border-radius: 4px;
+  font-size: 16px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.deleteContainer .submitBtn:hover {
+  background-color: #990000;
+}
+
+/* Lista de sugerencias */
+.deleteContainer .suggestionsList {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  background-color: white;
+  border: 1px solid #ddd;
+  border-top: none;
+  border-radius: 0 0 4px 4px;
+  max-height: 200px;
+  overflow-y: auto;
+  z-index: 10;
+  box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+}
+
+.deleteContainer .suggestionItem {
+  padding: 10px;
+  cursor: pointer;
+  font-size: 15px;
+  transition: background-color 0.2s;
+  border-bottom: 1px solid #eee;
+}
+
+.deleteContainer .suggestionItem:hover {
+  background-color: #f0f0f0;
+}
+
+/* Información del vehículo */
+.deleteContainer .vehicleInfoBox {
+  background-color: #eef4fa;
+  border-left: 4px solid #003366;
+  padding: 15px 20px;
+  border-radius: 5px;
+  margin: 20px 0;
+  color: #003366;
+  font-size: 16px;
+}
+
+.deleteContainer .vehicleInfoBox p {
+  margin: 8px 0;
+}
+
+/* Modal */
+.deleteContainer .modalOverlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  animation: fadeIn 0.3s ease-in-out;
+}
+
+.deleteContainer .modalContent {
+  background: #fff;
+  padding: 30px 40px;
+  border-radius: 16px;
+  text-align: center;
+  max-width: 400px;
+  width: 90%;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+  animation: scaleIn 0.4s ease;
+}
+
+.deleteContainer .modalContent.success {
+  border-top: 8px solid #28a745;
+}
+
+.deleteContainer .modalIcon {
+  font-size: 3rem;
+  color: #28a745;
+  margin-bottom: 15px;
+}
+
+.deleteContainer .modalTitle {
+  font-size: 1.5rem;
+  color: #003366;
+  margin-bottom: 10px;
+}
+
+.deleteContainer .modalMessage {
+  font-size: 1rem;
+  color: #555;
+  margin-bottom: 25px;
+}
+
+.deleteContainer .modalButton {
+  padding: 10px 25px;
+  font-size: 14px;
+  background-color: #003366;
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.deleteContainer .modalButton:hover {
+  background-color: #002244;
+}
+
+.deleteContainer .error {
+  color: red;
+  font-size: 0.9rem;
+  margin-top: 4px;
+}
+
+/* Animaciones */
+@keyframes fadeIn {
+  from { background-color: rgba(0, 0, 0, 0); }
+  to { background-color: rgba(0, 0, 0, 0.4); }
+}
+
+@keyframes scaleIn {
+  0% { transform: scale(0.8); opacity: 0; }
+  100% { transform: scale(1); opacity: 1; }
+}
+
+/* Responsive */
+@media (max-width: 600px) {
+  .deleteContainer {
+    padding: 15px;
+  }
+
+  .deleteContainer .reportForm {
+    padding: 15px;
+  }
+}

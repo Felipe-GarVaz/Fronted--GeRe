@@ -8,6 +8,11 @@ const VehicleMenu = () => {
   // ===== Lista de módulos =====
   const vehicleModules = [
     {
+      title: "Agregar Vehiculo",
+      icon: "➕🚗",
+      onClick: () => navigate("/agregar-vehiculo")
+    },
+    {
       title: "Vehículos Registrados",
       icon: "🚗",
       onClick: () => navigate("/vehiculos-registrados")

@@ -13,12 +13,13 @@ import DeviceReport from './pages/tpsAndReaders/deviceReport/deviceReport';
 import VehicleWorkshop from './pages/vehicle/vehicleWorkshop/vehicleWorkshop';
 import VehicleYard from './pages/vehicle/vehicleYard/vehicleYard'
 import DeviceDamaged from './pages/tpsAndReaders/deviceDamaged/deviceDamaged';
+import VehicleCreate from './pages/vehicle/vehicleCreate/vehicleCreate';
 
 function App() {
   return (
     <Router>
       <Routes>
-        
+
         <Route path="/" element={<Navigate to="/login" replace />} />
         <Route path="/login" element={<Login />} />
 
@@ -30,6 +31,9 @@ function App() {
 
         <Route path="/vehiculos-menu"
           element={<ProtectedRoute><Layout><VehicleMenu /> </Layout></ProtectedRoute>} />
+
+        <Route path="/agregar-vehiculo"
+          element={<ProtectedRoute><Layout><VehicleCreate /> </Layout></ProtectedRoute>} />
 
         <Route path="/vehiculos-registrados"
           element={<ProtectedRoute><Layout><VehicleRegistration /> </Layout></ProtectedRoute>} />

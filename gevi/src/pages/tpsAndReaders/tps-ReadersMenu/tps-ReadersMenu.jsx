@@ -1,43 +1,12 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
 import "../../home/home.css";
+import { useAuth } from '../../../components/useAuth';
 
 const TpsReadersMenu = () => {
   const navigate = useNavigate();
-
-  // ===== Lista de módulos =====
-  const availableModules = [
-        {
-      title: "Agregar Dispositivo",
-      icon: "➕",
-      onClick: () => navigate("/agregar-dispositivo")
-    },
-    {
-      title: "Eliminar Dispositivo",
-      icon: "❌",
-      onClick: () => navigate("/eliminar-dispositivo")
-    },
-    {
-      title: "TP'S y Lectores Registrados",
-      icon: "📟",
-      onClick: () => navigate("/tps-lectores-registrados"),
-    },
-    {
-      title: "Reportar TP o Lector",
-      icon: "📝",
-      onClick: () => navigate("/reportar-tp-lector"),
-    },
-    {
-      title: "TPS y Lectores Dañados",
-      icon: "❗",
-      onClick: () => navigate("/tps-lectores-defectuosos"),
-    },
-    {
-      title: "Excel",
-      icon: "🧾",
-      onClick: () => downloadExcelFile(),
-    }
-  ];
+  const { roles } = useAuth();
+  const isAdmin = roles.includes("ADMIN");
 
   // ===== Descarga de Excel =====
   const downloadExcelFile = () => {
@@ -75,6 +44,41 @@ const TpsReadersMenu = () => {
         console.error("Falló la descarga del Excel:", error);
       });
   };
+
+  // ===== Lista de módulos =====
+  const availableModules = [
+    isAdmin && {
+      title: "Agregar Dispositivo",
+      icon: "➕",
+      onClick: () => navigate("/agregar-dispositivo")
+    },
+    isAdmin && {
+      title: "Eliminar Dispositivo",
+      icon: "❌",
+      onClick: () => navigate("/eliminar-dispositivo")
+    },
+    {
+      title: "TP'S y Lectores Registrados",
+      icon: "📟",
+      onClick: () => navigate("/tps-lectores-registrados"),
+    },
+    {
+      title: "Reportar TP o Lector",
+      icon: "📝",
+      onClick: () => navigate("/reportar-tp-lector"),
+    },
+    {
+      title: "TPS y Lectores Dañados",
+      icon: "❗",
+      onClick: () => navigate("/tps-lectores-defectuosos"),
+    },
+    {
+      title: "Excel",
+      icon: "🧾",
+      onClick: () => downloadExcelFile(),
+    }
+  ].filter(Boolean);
+  ;
 
   // ===== Renderizado =====
   return (

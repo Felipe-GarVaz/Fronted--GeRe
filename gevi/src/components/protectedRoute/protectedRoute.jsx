@@ -1,16 +1,16 @@
+// src/auth/RequireAuth.jsx
 import React from "react";
 import { Navigate } from "react-router-dom";
+import { useAuth, hasAnyRole } from "../useAuth";
 
-const ProtectedRoute = ({ children }) => {
-  const token = localStorage.getItem("token");
+export default function RequireAuth({ children, roles = [] }) {
+  const { isAuth, roles: userRoles } = useAuth();
 
-  // Si no hay token en el localStorage, redirige a /login
-  if (!token) {
+  if (!isAuth) {
     return <Navigate to="/login" replace />;
   }
-
-  // Si hay token, deja pasar al componente hijo
+  if (roles.length && !hasAnyRole(userRoles, roles)) {
+    return <Navigate to="/403" replace />; // página de No Autorizado
+  }
   return children;
-};
-
-export default ProtectedRoute;
+}

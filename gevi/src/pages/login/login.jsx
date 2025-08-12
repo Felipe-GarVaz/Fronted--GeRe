@@ -30,12 +30,14 @@ const Login = () => {
         }
       });
 
-      const { token, name } = response.data;
+      const { token, name, roles } = response.data;
 
       // Guardar sesión en localStorage
       localStorage.setItem("token", token);
       localStorage.setItem("rpe", rpe);
       localStorage.setItem("nombre", name);
+
+      console.log('roles backend', roles);
 
       // Redirigir al home
       navigate("/home");

@@ -1,18 +1,54 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import '../../home/home.css';
+import { useAuth } from '../../../components/useAuth'; 
 
 const VehicleMenu = () => {
   const navigate = useNavigate();
+  const { roles } = useAuth();
+  const isAdmin = roles.includes("ADMIN");
 
-  // ===== Lista de módulos =====
+  const downloadExcelFile = () => {
+    const token = localStorage.getItem("token");
+
+    fetch("http://localhost:8080/api/vehicles/download", {
+      method: "GET",
+      headers: {
+        Authorization: `Bearer ${token}`
+      }
+    })
+      .then(response => {
+        if (!response.ok) throw new Error("Error al descargar el archivo");
+        return response.blob();
+      })
+      .then(blob => {
+        const url = window.URL.createObjectURL(blob);
+        const link = document.createElement("a");
+
+        const today = new Date();
+        const year = today.getFullYear();
+        const month = String(today.getMonth() + 1).padStart(2, '0');
+        const day = String(today.getDate()).padStart(2, '0');
+        const filename = `vehiculos_${year}-${month}-${day}.xlsx`;
+
+        link.href = url;
+        link.setAttribute("download", filename);
+        document.body.appendChild(link);
+        link.click();
+        link.remove();
+      })
+      .catch(error => {
+        console.error("Falló la descarga del Excel:", error);
+      });
+  };
+
   const vehicleModules = [
-    {
+    isAdmin && {
       title: "Agregar Vehículo",
       icon: "➕",
       onClick: () => navigate("/agregar-vehiculo")
     },
-    {
+    isAdmin && {
       title: "Eliminar Vehículo",
       icon: "❌",
       onClick: () => navigate("/eliminar-vehiculo")
@@ -45,49 +81,10 @@ const VehicleMenu = () => {
     {
       title: "Excel",
       icon: "📋",
-      onClick: () => downloadExcelFile(),
+      onClick: () => downloadExcelFile()
     }
-  ];
+  ].filter(Boolean); 
 
-  // ===== Lógica para descargar Excel =====
-  const downloadExcelFile = () => {
-    const token = localStorage.getItem("token");
-
-    fetch("http://localhost:8080/api/vehicles/download", {
-      method: "GET",
-      headers: {
-        Authorization: `Bearer ${token}`
-      }
-    })
-      .then(response => {
-        if (!response.ok) {
-          throw new Error("Error al descargar el archivo");
-        }
-        return response.blob();
-      })
-      .then(blob => {
-        const url = window.URL.createObjectURL(blob);
-        const link = document.createElement("a");
-
-        // Formato de fecha actual
-        const today = new Date();
-        const year = today.getFullYear();
-        const month = String(today.getMonth() + 1).padStart(2, '0');
-        const day = String(today.getDate()).padStart(2, '0');
-        const filename = `vehiculos_${year}-${month}-${day}.xlsx`;
-
-        link.href = url;
-        link.setAttribute("download", filename);
-        document.body.appendChild(link);
-        link.click();
-        link.remove();
-      })
-      .catch(error => {
-        console.error("Falló la descarga del Excel:", error);
-      });
-  };
-
-  // ===== Renderizado =====
   return (
     <div className="homeContainer">
       <main className="modulesContainer">

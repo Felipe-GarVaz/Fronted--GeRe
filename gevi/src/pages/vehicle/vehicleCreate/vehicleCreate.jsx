@@ -45,36 +45,96 @@ const AddVehicle = () => {
   // Validaciones simples en front
   const validate = () => {
     const e = {};
-    if (!formData.economical?.trim()) e.economical = 'Requerido';
-    if (!formData.badge?.trim()) e.badge = 'Requerido';
-    if (!formData.property) e.property = 'Seleccione una opción';
-    if (formData.mileage === '' || formData.mileage === null) e.mileage = 'Requerido';
-    if (Number(formData.mileage) < 0) e.mileage = 'No puede ser negativo';
-    if (!formData.brand?.trim()) e.brand = 'Requerido';
-    if (!formData.model?.trim()) e.model = 'Requerido';
-    if (formData.year === '' || formData.year === null) e.year = 'Requerido';
-    if (Number(formData.year) < 1900) e.year = 'Debe ser ≥ 1900';
-    if (!formData.workCenterId) e.workCenterId = 'Seleccione un centro';
-    if (!formData.processId) e.processId = 'Seleccione un proceso';
+    const currentYear = new Date().getFullYear();
+
+    // --- mileage: 1-6 dígitos y número válido ---
+    const mileageStr = String(formData.mileage ?? '').trim();
+    const mileageNum = mileageStr === '' ? NaN : parseInt(mileageStr, 10);
+
+    if (mileageStr === '') {
+      e.mileage = 'Requerido';
+    } else if (!/^\d{1,6}$/.test(mileageStr)) {
+      e.mileage = 'Máximo 6 dígitos (solo números)';
+    } else if (Number.isNaN(mileageNum) || mileageNum < 0) {
+      e.mileage = 'Debe ser un número entero positivo';
+    }
+
+    // --- year: exactamente 4 dígitos en rango ---
+    const yearStr = String(formData.year ?? '').trim();
+    const yearNum = yearStr === '' ? NaN : parseInt(yearStr, 10);
+
+    if (yearStr === '') {
+      e.year = 'Requerido';
+    } else if (!/^\d{4}$/.test(yearStr)) {
+      e.year = 'Debe tener exactamente 4 dígitos';
+    } else if (Number.isNaN(yearNum) || yearNum < 1900 || yearNum > currentYear) {
+      e.year = `Debe estar entre 1900 y ${currentYear}`;
+    }
+    
     return e;
   };
+
+
 
   const handleChange = (e) => {
     const { name, value } = e.target;
 
-    // normalizamos numéricos
-    if (['mileage', 'year', 'workCenterId', 'processId'].includes(name)) {
+    if (name === 'economical') {
+      // Solo números
+      const numericValue = value.replace(/\D/g, '');
+      setFormData((prev) => ({
+        ...prev,
+        [name]: numericValue
+      }));
+    }
+    else if (name === 'year') {
+      // Solo números y máximo 4 dígitos
+      const numericValue = value.replace(/\D/g, '').slice(0, 4);
+      setFormData((prev) => ({
+        ...prev,
+        [name]: numericValue
+      }));
+    }
+    else if (name === 'mileage') {
+      // Solo números y máximo 6 dígitos
+      const numericValue = value.replace(/\D/g, '').slice(0, 6);
+      setFormData((prev) => ({
+        ...prev,
+        [name]: numericValue
+      }));
+    }
+    else if (['workCenterId', 'processId'].includes(name)) {
       setFormData((prev) => ({
         ...prev,
         [name]: value === '' ? '' : Number(value)
       }));
-      setErrors((prev) => ({ ...prev, [name]: undefined }));
-      return;
+    }
+    else if (['brand', 'model'].includes(name)) {
+      // Siempre mayúsculas
+      setFormData((prev) => ({
+        ...prev,
+        [name]: value.toUpperCase()
+      }));
+    }
+    else if (name === 'badge') {
+      // Mayúsculas y máximo 7 caracteres
+      setFormData((prev) => ({
+        ...prev,
+        [name]: value.toUpperCase().slice(0, 7)
+      }));
+    }
+    else {
+      setFormData((prev) => ({
+        ...prev,
+        [name]: value
+      }));
     }
 
-    setFormData((prev) => ({ ...prev, [name]: value }));
+    // Limpia el error del campo
     setErrors((prev) => ({ ...prev, [name]: undefined }));
   };
+
+
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -128,8 +188,10 @@ const AddVehicle = () => {
             name="economical"
             value={formData.economical}
             onChange={handleChange}
-            placeholder="Ej. CFE-001"
+            placeholder="EJ. 34567"
             autoComplete="off"
+            inputMode="numeric"
+            required
           />
           {errors.economical && <div className="error">{errors.economical}</div>}
         </div>
@@ -144,6 +206,8 @@ const AddVehicle = () => {
             onChange={handleChange}
             placeholder="Ej. ABC1234"
             autoComplete="off"
+            maxLength={7}
+            required
           />
           {errors.badge && <div className="error">{errors.badge}</div>}
         </div>
@@ -151,7 +215,7 @@ const AddVehicle = () => {
         {/* Propiedad */}
         <div className="formGroup">
           <label>Propiedad</label>
-          <select name="property" value={formData.property} onChange={handleChange}>
+          <select name="property" value={formData.property} onChange={handleChange}required>
             <option value="">Seleccione propiedad</option>
             <option value="PROPIO">PROPIO</option>
             <option value="ARRENDADO">ARRENDADO</option>
@@ -168,6 +232,8 @@ const AddVehicle = () => {
             value={formData.mileage}
             onChange={handleChange}
             placeholder="Ej. 120000"
+            maxLength={6}
+            required
           />
           {errors.mileage && <div className="error">{errors.mileage}</div>}
         </div>
@@ -180,8 +246,9 @@ const AddVehicle = () => {
             name="brand"
             value={formData.brand}
             onChange={handleChange}
-            placeholder="Ej. Ford"
+            placeholder="Ej. FORD"
             autoComplete="off"
+            required
           />
           {errors.brand && <div className="error">{errors.brand}</div>}
         </div>
@@ -196,6 +263,7 @@ const AddVehicle = () => {
             onChange={handleChange}
             placeholder="Ej. F-150"
             autoComplete="off"
+            required
           />
           {errors.model && <div className="error">{errors.model}</div>}
         </div>
@@ -209,6 +277,8 @@ const AddVehicle = () => {
             value={formData.year}
             onChange={handleChange}
             placeholder="Ej. 2019"
+            maxLength={4}
+            required
           />
           {errors.year && <div className="error">{errors.year}</div>}
         </div>
@@ -220,6 +290,7 @@ const AddVehicle = () => {
             name="workCenterId"
             value={formData.workCenterId}
             onChange={handleChange}
+            required
           >
             <option value="">Seleccione centro de trabajo</option>
             {workCenters.map((ct) => (
@@ -238,6 +309,7 @@ const AddVehicle = () => {
             name="processId"
             value={formData.processId}
             onChange={handleChange}
+            required
           >
             <option value="">Seleccione proceso</option>
             {processes.map((pr) => (

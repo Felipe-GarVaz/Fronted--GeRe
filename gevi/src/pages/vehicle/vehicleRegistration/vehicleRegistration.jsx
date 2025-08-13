@@ -93,7 +93,7 @@ const RegisteredVehicles = () => {
                     <input
                         type="text"
                         name="busqueda"
-                        placeholder="Ej: CFE-001"
+                        placeholder="Ej: 23245"
                         value={filters.busqueda}
                         onChange={handleFilterChange}
                     />

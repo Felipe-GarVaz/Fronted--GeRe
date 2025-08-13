@@ -128,13 +128,13 @@ const VehicleHistory = () => {
       {/* Sección de búsqueda */}
       <div className="searchSection">
         <div className="searchBox">
-          <label className="searchLabel">Buscar vehículo:</label>
+          <label className="searchLabel">Buscar vehículo</label>
           <div className="searchInputGroup">
             <div className="searchInputContainer">
               <input
                 type="text"
                 className="searchInput"
-                placeholder="Ej: CFE-001 o ABC1234"
+                placeholder="Buscar por número económico o placa"
                 value={searchTerm}
                 onChange={handleSearchChange}
                 onBlur={() => setTimeout(() => setSuggestions([]), 100)}

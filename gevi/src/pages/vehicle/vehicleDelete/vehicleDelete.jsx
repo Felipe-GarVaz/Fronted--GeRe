@@ -119,16 +119,17 @@ const DeleteVehicle = () => {
             <form className="reportForm" onSubmit={handleSubmitOrEnter}>
                 {/* Input combinado: económico o placa */}
                 <div className="formGroup searchContainer">
-                    <label>Buscar por número económico o placa:</label>
+                    <label>Buscar vehiculo</label>
                     <input
                         type="text"
-                        placeholder="Ej. CFE-001 o ABC1234"
+                        placeholder="Buscar por número económico o placa"
                         value={searchTerm}
                         onChange={(e) => {
                             setSearchTerm(e.target.value);
                             setErrorMsg("");
                         }}
                         autoComplete="off"
+                        required
                     />
                     {suggestions.length > 0 && (
                         <ul className="suggestionsList">

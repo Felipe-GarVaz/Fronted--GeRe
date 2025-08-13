@@ -94,6 +94,22 @@ const VehicleReport = () => {
   // ===== Manejadores del formulario =====
   const handleChange = (e) => {
     const { name, value } = e.target;
+
+    // Kilometraje: solo números y máx 6
+    if (name === 'kilometraje') {
+      const onlyDigits = value.replace(/\D/g, '').slice(0, 6);
+      setFormData(prev => ({ ...prev, [name]: onlyDigits }));
+      setMileageError(''); // limpiar error al teclear
+      return;
+    }
+
+    // Falla personalizada: siempre en MAYÚSCULAS
+    if (name === 'fallaPersonalizada') {
+      setFormData(prev => ({ ...prev, [name]: value.toUpperCase() }));
+      return;
+    }
+
+    // Resto de campos sin cambios
     setFormData(prev => ({ ...prev, [name]: value }));
   };
 
@@ -233,7 +249,7 @@ const VehicleReport = () => {
       <form onSubmit={handleSubmit} className="reportForm">
         {/* Búsqueda del vehículo */}
         <div className="formGroup searchContainer">
-          <label>Buscar Vehículo:</label>
+          <label>Buscar Vehículo</label>
           <input
             type="text"
             placeholder="Buscar por número económico o placa"
@@ -267,7 +283,7 @@ const VehicleReport = () => {
 
             {/* Selección de nuevo estado */}
             <div className="formGroup">
-              <label>Nuevo Estado:</label>
+              <label>Nuevo Estado</label>
               <select
                 name="nuevoEstado"
                 value={formData.nuevoEstado}
@@ -287,7 +303,7 @@ const VehicleReport = () => {
                 {/* Ubicación si es indisponible */}
                 {formData.nuevoEstado === 'INDISPONIBLE' && (
                   <div className="formGroup">
-                    <label>Ubicación del Vehículo:</label>
+                    <label>Ubicación del Vehículo</label>
                     <select
                       name="ubicacionIndisponible"
                       value={formData.ubicacionIndisponible}
@@ -303,7 +319,7 @@ const VehicleReport = () => {
 
                 {/* Tipo de falla */}
                 <div className="formGroup">
-                  <label>Falla Detectada:</label>
+                  <label>Falla Detectada</label>
                   <select
                     name="tipoFalla"
                     value={selectedFailTypeId}
@@ -316,14 +332,14 @@ const VehicleReport = () => {
                         {failType.name}
                       </option>
                     ))}
-                    <option value="otros">Otros...</option>
+                    <option value="otros">OTRO...</option>
                   </select>
                 </div>
 
                 {/* Falla personalizada si aplica */}
                 {showCustomFailInput && (
                   <div className="formGroup">
-                    <label>Especifique la falla:</label>
+                    <label>Especifique la falla</label>
                     <input
                       type="text"
                       name="fallaPersonalizada"
@@ -339,13 +355,15 @@ const VehicleReport = () => {
 
             {/* Kilometraje nuevo */}
             <div className="formGroup">
-              <label>Nuevo Kilometraje:</label>
+              <label>Nuevo Kilometraje</label>
               <input
                 type="number"
                 name="kilometraje"
                 value={formData.kilometraje}
                 onChange={handleChange}
                 placeholder="Ingrese el nuevo kilometraje"
+                inputMode="numeric"
+                maxLength={6}
                 required
               />
               {mileageError && <p className="error">{mileageError}</p>}

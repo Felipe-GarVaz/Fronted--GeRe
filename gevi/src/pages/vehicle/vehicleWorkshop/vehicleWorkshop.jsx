@@ -101,7 +101,7 @@ const WorkshopVehicle = () => {
             <input
               type="text"
               className="searchInput"
-              placeholder="Ej: CFE-001 o ABC1234"
+              placeholder="Buscar por número económico o placa"
               value={searchTerm}
               onChange={handleSearchChange}
               onBlur={() => setTimeout(() => setSuggestions([]), 150)}

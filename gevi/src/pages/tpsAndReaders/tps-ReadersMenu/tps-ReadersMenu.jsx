@@ -58,23 +58,23 @@ const TpsReadersMenu = () => {
       onClick: () => navigate("/eliminar-dispositivo")
     },
     {
-      title: "TP'S y Lectores Registrados",
-      icon: "📟",
+      title: "Dispositivos Registrados",
+      icon: "📖",
       onClick: () => navigate("/tps-lectores-registrados"),
     },
     {
-      title: "Reportar TP o Lector",
+      title: "Reportar Dispositivo",
       icon: "📝",
       onClick: () => navigate("/reportar-tp-lector"),
     },
     {
-      title: "TPS y Lectores Dañados",
+      title: "Dispositivos Dañados",
       icon: "❗",
       onClick: () => navigate("/tps-lectores-defectuosos"),
     },
     {
       title: "Excel",
-      icon: "🧾",
+      icon: "📋",
       onClick: () => downloadExcelFile(),
     }
   ].filter(Boolean);

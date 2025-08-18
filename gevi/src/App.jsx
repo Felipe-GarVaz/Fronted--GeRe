@@ -60,7 +60,7 @@ function App() {
         <Route path="/patio"
           element={<ProtectedRoute><Layout><VehicleYard /> </Layout></ProtectedRoute>} />
 
-        <Route path="/agregar-despositivo"
+        <Route path="/agregar-dispositivo"
           element={<ProtectedRoute roles={['ADMIN']}><Layout><DeviceCreate /> </Layout></ProtectedRoute>} />
 
         <Route path="/eliminar-dispositivo"

@@ -14,7 +14,7 @@ const Home = () => {
     },
     {
       title: "TP'S y Lectores",
-      icon: "📇📡",
+      icon: "📱",
       onClick: () => navigate("/tps-lectores-menu")
     }
   ];

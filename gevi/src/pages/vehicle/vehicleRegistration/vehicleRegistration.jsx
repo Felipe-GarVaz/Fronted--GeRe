@@ -6,18 +6,18 @@ const RegisteredVehicles = () => {
     // ===== Estados principales =====
     const [vehicles, setVehicles] = useState([]);
     const [filterOptions, setFilterOptions] = useState({
-        centroTrabajo: [],
-        proceso: [],
-        estado: [],
-        propiedad: []
+        workCenter: [],
+        process: [],
+        status: [],
+        property: []
     });
 
     const [filters, setFilters] = useState({
-        centroTrabajo: '',
+        workCenter: '',
         proceso: '',
-        estado: '',
-        propiedad: '',
-        busqueda: ''
+        status: '',
+        property: '',
+        search: ''
     });
 
     // ===== Obtener filtros =====
@@ -60,21 +60,21 @@ const RegisteredVehicles = () => {
 
     const resetFilters = () => {
         setFilters({
-            centroTrabajo: '',
-            proceso: '',
-            estado: '',
-            propiedad: '',
-            busqueda: ''
+            workCenter: '',
+            process: '',
+            status: '',
+            property: '',
+            search: ''
         });
     };
 
     // ===== Filtrar vehículos =====
     const filteredVehicles = vehicles.filter(vehicle => (
-        (!filters.centroTrabajo || vehicle.workCenterId.toString() === filters.centroTrabajo) &&
-        (!filters.proceso || vehicle.processId.toString() === filters.proceso) &&
-        (!filters.estado || vehicle.status === filters.estado) &&
-        (!filters.propiedad || vehicle.property === filters.propiedad) &&
-        (!filters.busqueda || vehicle.economical.toLowerCase().includes(filters.busqueda.toLowerCase()))
+        (!filters.workCenter || vehicle.workCenterId.toString() === filters.workCenter) &&
+        (!filters.process || vehicle.processId.toString() === filters.process) &&
+        (!filters.status || vehicle.status === filters.status) &&
+        (!filters.property || vehicle.property === filters.property) &&
+        (!filters.search || vehicle.economical.toLowerCase().includes(filters.search.toLowerCase()))
     ));
 
     const formatStatus = (status) => {
@@ -92,21 +92,21 @@ const RegisteredVehicles = () => {
                     <label>Buscar por Económico:</label>
                     <input
                         type="text"
-                        name="busqueda"
+                        name="search"
                         placeholder="Ej: 23245"
-                        value={filters.busqueda}
+                        value={filters.search}
                         onChange={handleFilterChange}
                     />
                 </div>
 
-                {['centroTrabajo', 'proceso', 'estado', 'propiedad'].map(key => (
+                {['workCenter', 'process', 'status', 'property'].map(key => (
                     <div className="filterGroup" key={key}>
                         <label>
-                            {key === 'centroTrabajo'
+                            {key === 'workCenter'
                                 ? 'Centro de Trabajo'
-                                : key === 'proceso'
+                                : key === 'process'
                                     ? 'Proceso'
-                                    : key === 'estado'
+                                    : key === 'status'
                                         ? 'Estado'
                                         : 'Propiedad'}
                             :</label>

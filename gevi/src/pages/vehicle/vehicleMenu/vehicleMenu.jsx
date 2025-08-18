@@ -55,7 +55,7 @@ const VehicleMenu = () => {
     },
     {
       title: "Vehículos Registrados",
-      icon: "🚗",
+      icon: "📖",
       onClick: () => navigate("/vehiculos-registrados")
     },
     {

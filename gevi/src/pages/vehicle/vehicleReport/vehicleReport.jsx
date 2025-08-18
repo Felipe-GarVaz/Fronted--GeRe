@@ -7,15 +7,15 @@ const VehicleReport = () => {
   const [vehicles, setVehicles] = useState([]);
   const [failTypes, setFailTypes] = useState([]);
   const [formData, setFormData] = useState({
-    economico: '',
-    placa: '',
-    estadoActual: '',
-    kilometrajeActual: '',
-    nuevoEstado: '',
-    tipoFalla: '',
-    kilometraje: '',
-    ubicacionIndisponible: '',
-    fallaPersonalizada: ''
+    economical: '',
+    badge: '',
+    currentStatus: '',
+    currentMileage: '',
+    newStatus: '',
+    failType: '',
+    mileage: '',
+    locationUnavailable: '',
+    personalizedFailure: ''
   });
 
   const [searchTerm, setSearchTerm] = useState('');
@@ -33,14 +33,12 @@ const VehicleReport = () => {
     const fetchData = async () => {
       try {
         const token = localStorage.getItem("token");
-
         const [vehiclesRes, failTypesRes] = await Promise.all([
           axios.get("http://localhost:8080/api/vehicles", { headers: { Authorization: `Bearer ${token}` } }),
           axios.get("http://localhost:8080/api/failTypes", { headers: { Authorization: `Bearer ${token}` } })
         ]);
-
-        setVehicles(vehiclesRes.data);
-        setFailTypes(failTypesRes.data);
+        setVehicles(vehiclesRes.data || []);
+        setFailTypes(failTypesRes.data || []);
       } catch (error) {
         console.error("Error al cargar datos iniciales:", error);
       }
@@ -48,97 +46,68 @@ const VehicleReport = () => {
     fetchData();
   }, []);
 
-  // ===== Buscar sugerencias mientras escribe =====
+  // ===== Buscar sugerencias mientras escribe (con pequeño debounce) =====
   useEffect(() => {
     if (hasSelectedSuggestion.current) {
       hasSelectedSuggestion.current = false;
       return;
     }
+    if (searchTerm.trim() === '') {
+      setSuggestions([]);
+      return;
+    }
 
-    const fetchSuggestions = async () => {
-      if (searchTerm.trim() === '') return setSuggestions([]);
-
+    const handle = setTimeout(async () => {
       try {
         const token = localStorage.getItem("token");
-        const response = await axios.get(`http://localhost:8080/api/vehicles/search?query=${encodeURIComponent(searchTerm)}`, {
-          headers: { Authorization: `Bearer ${token}` }
-        });
-        setSuggestions(response.data);
+        const response = await axios.get(
+          `http://localhost:8080/api/vehicles/search?query=${encodeURIComponent(searchTerm)}`,
+          { headers: { Authorization: `Bearer ${token}` } }
+        );
+        const data = response.data || [];
+        setSuggestions(data);
 
-        const match = response.data.find(v =>
-          v.economico?.toLowerCase() === searchTerm.toLowerCase() ||
-          v.placa?.toLowerCase() === searchTerm.toLowerCase()
+        // Si el usuario escribe EXACTO el económico o la placa, autocompleta
+        const match = data.find(v =>
+          v.economical?.toLowerCase() === searchTerm.toLowerCase() ||
+          v.badge?.toLowerCase() === searchTerm.toLowerCase()
         );
 
         if (match) {
           setFormData({
-            economico: match.economical,
-            placa: match.badge,
-            estadoActual: match.status,
-            kilometrajeActual: match.mileage,
-            nuevoEstado: '',
-            tipoFalla: '',
-            kilometraje: '',
-            ubicacionIndisponible: '',
-            fallaPersonalizada: ''
+            economical: match.economical,
+            badge: match.badge,
+            currentStatus: match.status,
+            currentMileage: match.mileage,
+            newStatus: '',
+            failType: '',
+            mileage: '',
+            locationUnavailable: '',
+            personalizedFailure: ''
           });
+          setSelectedFailTypeId('');
+          setShowCustomFailInput(false);
         }
       } catch (error) {
         console.error("Error al buscar vehículos:", error);
       }
-    };
+    }, 250);
 
-    fetchSuggestions();
+    return () => clearTimeout(handle);
   }, [searchTerm]);
 
-  // ===== Manejadores del formulario =====
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-
-    // Kilometraje: solo números y máx 6
-    if (name === 'kilometraje') {
-      const onlyDigits = value.replace(/\D/g, '').slice(0, 6);
-      setFormData(prev => ({ ...prev, [name]: onlyDigits }));
-      setMileageError(''); // limpiar error al teclear
-      return;
+  // ===== Utilidades =====
+  const toReadableStatus = (statusEnum) => {
+    switch (statusEnum) {
+      case "DISPONIBLE":
+        return "DISPONIBLE";
+      case "OPERANDO_CON_FALLA":
+        return "OPERANDO CON FALLA";
+      case "INDISPONIBLE":
+        return "INDISPONIBLE";
+      default:
+        return statusEnum || '';
     }
-
-    // Falla personalizada: siempre en MAYÚSCULAS
-    if (name === 'fallaPersonalizada') {
-      setFormData(prev => ({ ...prev, [name]: value.toUpperCase() }));
-      return;
-    }
-
-    // Resto de campos sin cambios
-    setFormData(prev => ({ ...prev, [name]: value }));
-  };
-
-  const handleFailTypeChange = (e) => {
-    const value = e.target.value;
-    setSelectedFailTypeId(value);
-    setFormData(prev => ({
-      ...prev,
-      tipoFalla: value,
-      fallaPersonalizada: value === 'otros' ? prev.fallaPersonalizada : ''
-    }));
-    setShowCustomFailInput(value === 'otros');
-  };
-
-  const handleSelectSuggestion = (vehicle) => {
-    hasSelectedSuggestion.current = true;
-    setSearchTerm(`${vehicle.economical} - ${vehicle.badge}`);
-    setFormData({
-      economico: vehicle.economical,
-      placa: vehicle.badge,
-      estadoActual: vehicle.status,
-      kilometrajeActual: vehicle.mileage,
-      nuevoEstado: '',
-      tipoFalla: '',
-      kilometraje: '',
-      ubicacionIndisponible: '',
-      fallaPersonalizada: ''
-    });
-    setSuggestions([]);
   };
 
   const convertStatus = (text) => {
@@ -156,45 +125,108 @@ const VehicleReport = () => {
 
   const resetForm = () => {
     setFormData({
-      economico: '',
-      placa: '',
-      estadoActual: '',
-      kilometrajeActual: '',
-      nuevoEstado: '',
-      tipoFalla: '',
-      kilometraje: '',
-      ubicacionIndisponible: '',
-      fallaPersonalizada: ''
+      economical: '',
+      badge: '',
+      currentStatus: '',
+      currentMileage: '',
+      newStatus: '',
+      failType: '',
+      mileage: '',
+      locationUnavailable: '',
+      personalizedFailure: ''
     });
+    setSelectedFailTypeId('');
+    setShowCustomFailInput(false);
+    setMileageError('');
   };
 
-  const toReadableStatus = (statusEnum) => {
-    switch (statusEnum) {
-      case "DISPONIBLE":
-        return "DISPONIBLE";
-      case "OPERANDO_CON_FALLA":
-        return "OPERANDO CON FALLA";
-      case "INDISPONIBLE":
-        return "INDISPONIBLE";
-      default:
-        return statusEnum;
-    }
-  };
-
-  // =====Estados diferentes al actual =====
+  // ===== Estados diferentes al actual =====
   const filteredStatusOptions = statusOptions.filter(
-    (estado) => estado !== toReadableStatus(formData.estadoActual)
+    (status) => status !== toReadableStatus(formData.currentStatus)
   );
+
+  // ===== Manejadores del formulario =====
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+
+    // Kilometraje: solo números y máx 6
+    if (name === 'mileage') {
+      const onlyDigits = value.replace(/\D/g, '').slice(0, 6);
+      setFormData(prev => ({ ...prev, [name]: onlyDigits }));
+      setMileageError(''); // limpiar error al teclear
+      return;
+    }
+
+    // Falla personalizada: siempre en MAYÚSCULAS
+    if (name === 'personalizedFailure') {
+      setFormData(prev => ({ ...prev, [name]: value.toUpperCase() }));
+      return;
+    }
+
+    // Si cambia el estado y es DISPONIBLE, limpia campos de falla/ubicación
+    if (name === 'newStatus') {
+      const next = value;
+      setFormData(prev => ({
+        ...prev,
+        newStatus: next,
+        ...(next === 'DISPONIBLE'
+          ? { failType: '', personalizedFailure: '', locationUnavailable: '' }
+          : {})
+      }));
+      if (value === 'DISPONIBLE') {
+        setSelectedFailTypeId('');
+        setShowCustomFailInput(false);
+      }
+      return;
+    }
+
+    setFormData(prev => ({ ...prev, [name]: value }));
+  };
+
+  const handleFailTypeChange = (e) => {
+    const value = e.target.value;
+    setSelectedFailTypeId(value);
+    setFormData(prev => ({
+      ...prev,
+      failType: value,
+      personalizedFailure: value === 'otros' ? prev.personalizedFailure : ''
+    }));
+    setShowCustomFailInput(value === 'otros');
+  };
+
+  const handleSelectSuggestion = (vehicle) => {
+    hasSelectedSuggestion.current = true;
+    setSearchTerm(`${vehicle.economical} - ${vehicle.badge}`);
+    setFormData({
+      economical: vehicle.economical,
+      badge: vehicle.badge,
+      currentStatus: vehicle.status,
+      currentMileage: vehicle.mileage,
+      newStatus: '',
+      failType: '',
+      mileage: '',
+      locationUnavailable: '',
+      personalizedFailure: ''
+    });
+    setSelectedFailTypeId('');
+    setShowCustomFailInput(false);
+    setSuggestions([]);
+  };
 
   //===== Enviar reporte =====
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    const matchedVehicle = vehicles.find(v => v.economical === formData.economico);
-    if (!matchedVehicle) return alert("Vehículo no encontrado.");
+    const matchedVehicle = vehicles.find(v => v.economical === formData.economical);
+    if (!matchedVehicle) {
+      alert("Vehículo no encontrado.");
+      return;
+    }
 
-    const newMileage = parseInt(formData.kilometraje);
-    const currentMileage = parseInt(formData.kilometrajeActual);
+    const newMileage = parseInt(formData.mileage, 10);
+    const currentMileage = Number.isFinite(parseInt(formData.currentMileage, 10))
+      ? parseInt(formData.currentMileage, 10)
+      : 0;
 
     if (isNaN(newMileage)) {
       setMileageError("Debe ingresar un número válido.");
@@ -204,11 +236,10 @@ const VehicleReport = () => {
       setMileageError("El nuevo kilometraje no puede ser menor al kilometraje actual.");
       return;
     }
-
     setMileageError('');
 
     const token = localStorage.getItem("token");
-    const newStatus = convertStatus(formData.nuevoEstado);
+    const newStatus = convertStatus(formData.newStatus);
 
     const payload = {
       vehicleId: matchedVehicle.id,
@@ -217,12 +248,12 @@ const VehicleReport = () => {
     };
 
     if (newStatus === 'INDISPONIBLE' || newStatus === 'OPERANDO_CON_FALLA') {
-      payload.failTypeId = formData.tipoFalla === 'otros' ? null : parseInt(formData.tipoFalla);
-      payload.personalizedFailure = formData.tipoFalla === 'otros' ? formData.fallaPersonalizada : null;
+      payload.failTypeId = formData.failType === 'otros' ? null : parseInt(formData.failType, 10);
+      payload.personalizedFailure = formData.failType === 'otros' ? formData.personalizedFailure : null;
     }
 
     if (newStatus === 'INDISPONIBLE') {
-      payload.locationUnavailable = convertLocation(formData.ubicacionIndisponible);
+      payload.locationUnavailable = convertLocation(formData.locationUnavailable);
     }
 
     try {
@@ -243,6 +274,11 @@ const VehicleReport = () => {
   };
 
   //===== Renderizado =====
+  const currentMileageDisplay =
+    formData.currentMileage !== '' && formData.currentMileage !== null && formData.currentMileage !== undefined
+      ? Number(formData.currentMileage).toLocaleString()
+      : '-';
+
   return (
     <div className="reportContainer">
       <h1 className="formTitle">Reportar Estado de Vehículo</h1>
@@ -259,9 +295,9 @@ const VehicleReport = () => {
           />
           {suggestions.length > 0 && (
             <ul className="suggestionsList">
-              {suggestions.map((v, index) => (
+              {suggestions.map((v) => (
                 <li
-                  key={index}
+                  key={v.id ?? `${v.economical}-${v.badge}`}
                   className="suggestionItem"
                   onClick={() => handleSelectSuggestion(v)}
                 >
@@ -272,41 +308,42 @@ const VehicleReport = () => {
           )}
         </div>
 
-        {formData.economico && (
+        {/* 🔧 Aquí estaba el bug: usabas formData.economico */}
+        {formData.economical && (
           <>
             <div className="vehicleInfoBox">
-              <p><strong>Económico:</strong> {formData.economico}</p>
-              <p><strong>Placa:</strong> {formData.placa}</p>
-              <p><strong>Estado Actual:</strong> {formData.estadoActual}</p>
-              <p><strong>Kilometraje Actual:</strong> {Number(formData.kilometrajeActual).toLocaleString()} km</p>
+              <p><strong>Económico:</strong> {formData.economical}</p>
+              <p><strong>Placa:</strong> {formData.badge}</p>
+              <p><strong>Estado Actual:</strong> {toReadableStatus(formData.currentStatus)}</p>
+              <p><strong>Kilometraje Actual:</strong> {currentMileageDisplay} km</p>
             </div>
 
             {/* Selección de nuevo estado */}
             <div className="formGroup">
               <label>Nuevo Estado</label>
               <select
-                name="nuevoEstado"
-                value={formData.nuevoEstado}
+                name="newStatus"
+                value={formData.newStatus}
                 onChange={handleChange}
                 required
               >
                 <option value="">Seleccione el nuevo estado</option>
-                {filteredStatusOptions.map((estado, index) => (
-                  <option key={index} value={estado}>{estado}</option>
+                {filteredStatusOptions.map((status) => (
+                  <option key={status} value={status}>{status}</option>
                 ))}
               </select>
             </div>
 
             {/* Si el nuevo estado requiere ingresar falla */}
-            {(formData.nuevoEstado === 'OPERANDO CON FALLA' || formData.nuevoEstado === 'INDISPONIBLE') && (
+            {(formData.newStatus === 'OPERANDO CON FALLA' || formData.newStatus === 'INDISPONIBLE') && (
               <>
                 {/* Ubicación si es indisponible */}
-                {formData.nuevoEstado === 'INDISPONIBLE' && (
+                {formData.newStatus === 'INDISPONIBLE' && (
                   <div className="formGroup">
                     <label>Ubicación del Vehículo</label>
                     <select
-                      name="ubicacionIndisponible"
-                      value={formData.ubicacionIndisponible}
+                      name="locationUnavailable"
+                      value={formData.locationUnavailable}
                       onChange={handleChange}
                       required
                     >
@@ -321,7 +358,7 @@ const VehicleReport = () => {
                 <div className="formGroup">
                   <label>Falla Detectada</label>
                   <select
-                    name="tipoFalla"
+                    name="failType"
                     value={selectedFailTypeId}
                     onChange={handleFailTypeChange}
                     required
@@ -342,10 +379,10 @@ const VehicleReport = () => {
                     <label>Especifique la falla</label>
                     <input
                       type="text"
-                      name="fallaPersonalizada"
-                      value={formData.fallaPersonalizada}
+                      name="personalizedFailure"
+                      value={formData.personalizedFailure}
                       onChange={handleChange}
-                      placeholder="Describa la falla detectada"
+                      placeholder="DESCRIBA LA FALLA DETECTADA"
                       required
                     />
                   </div>
@@ -356,13 +393,15 @@ const VehicleReport = () => {
             {/* Kilometraje nuevo */}
             <div className="formGroup">
               <label>Nuevo Kilometraje</label>
+              {/* Usamos text + inputMode para poder limitar longitud */}
               <input
-                type="number"
-                name="kilometraje"
-                value={formData.kilometraje}
+                type="text"
+                name="mileage"
+                value={formData.mileage}
                 onChange={handleChange}
                 placeholder="Ingrese el nuevo kilometraje"
                 inputMode="numeric"
+                pattern="\d{1,6}"
                 maxLength={6}
                 required
               />

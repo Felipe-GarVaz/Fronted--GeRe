@@ -1,20 +1,23 @@
 // src/components/DeleteVehicle.jsx
 import React, { useEffect, useRef, useState } from "react";
 import axios from "axios";
-import "./vehicleDelete.css"; // reutilizamos el mismo estilo
+import "./vehicleDelete.css";
 
 const API_BASE = "http://localhost:8080/api";
 
 const DeleteVehicle = () => {
     const [searchTerm, setSearchTerm] = useState("");
     const [suggestions, setSuggestions] = useState([]);
+    const [activeIndex, setActiveIndex] = useState(-1); // navegación con teclado
     const [vehicle, setVehicle] = useState(null);
+    const [isSearching, setIsSearching] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
     const [showConfirm, setShowConfirm] = useState(false);
     const [errorMsg, setErrorMsg] = useState("");
     const hasSelectedSuggestion = useRef(false);
+    const listboxRef = useRef(null);
 
-    // Buscar sugerencias por económico O placa (mismo patrón de VehicleReport.jsx)
+    // ===== Buscar sugerencias por económico O placa (con debounce + cancelación)
     useEffect(() => {
         if (hasSelectedSuggestion.current) {
             hasSelectedSuggestion.current = false;
@@ -26,40 +29,47 @@ const DeleteVehicle = () => {
             setSuggestions([]);
             setVehicle(null);
             setErrorMsg("");
+            setActiveIndex(-1);
             return;
         }
 
-        const fetchSuggestions = async () => {
+        const controller = new AbortController();
+        const timer = setTimeout(async () => {
             try {
+                setIsSearching(true);
                 const token = localStorage.getItem("token");
                 const res = await axios.get(
                     `${API_BASE}/vehicles/search?query=${encodeURIComponent(q)}`,
-                    { headers: { Authorization: `Bearer ${token}` } }
+                    { headers: { Authorization: `Bearer ${token}` }, signal: controller.signal }
                 );
 
                 const data = Array.isArray(res.data) ? res.data : [];
                 setSuggestions(data);
+                setActiveIndex(data.length ? 0 : -1);
 
-                // Si hay coincidencia exacta por economico o placa, preselecciona
+                // Autoselección si hay coincidencia exacta por económico o placa
                 const lower = q.toLowerCase();
                 const exact = data.find(
                     (v) =>
                         v.economical?.toLowerCase() === lower ||
                         v.badge?.toLowerCase() === lower
                 );
-                if (exact) {
-                    setVehicle(exact);
-                } else {
-                    setVehicle(null);
-                }
+                setVehicle(exact || null);
             } catch (err) {
+                if (controller.signal.aborted) return;
                 console.error("Error al buscar vehículos:", err);
                 setSuggestions([]);
                 setVehicle(null);
+                setActiveIndex(-1);
+            } finally {
+                setIsSearching(false);
             }
-        };
+        }, 250);
 
-        fetchSuggestions();
+        return () => {
+            clearTimeout(timer);
+            controller.abort();
+        };
     }, [searchTerm]);
 
     const handleSelectSuggestion = (v) => {
@@ -67,6 +77,7 @@ const DeleteVehicle = () => {
         setSearchTerm(`${v.economical} - ${v.badge}`);
         setVehicle(v);
         setSuggestions([]);
+        setActiveIndex(-1);
         setErrorMsg("");
     };
 
@@ -74,6 +85,7 @@ const DeleteVehicle = () => {
         setSearchTerm("");
         setSuggestions([]);
         setVehicle(null);
+        setActiveIndex(-1);
         setErrorMsg("");
         setShowConfirm(false);
     };
@@ -84,20 +96,25 @@ const DeleteVehicle = () => {
         setErrorMsg("");
         try {
             const token = localStorage.getItem("token");
-            // Elimina por número económico
             await axios.delete(
                 `${API_BASE}/vehicles/economical/${encodeURIComponent(vehicle.economical)}`,
                 { headers: { Authorization: `Bearer ${token}` } }
             );
             setShowConfirm(false);
-            // Modal de éxito (reutilizamos estilos de modal)
+            // Flag para modal de éxito
             setVehicle((prev) => ({ ...prev, __deleted: true }));
         } catch (err) {
             console.error("No se pudo eliminar:", err);
-            setErrorMsg(
+            const status = err?.response?.status;
+            const serverMsg =
                 err?.response?.data?.message ||
-                "No se pudo eliminar el vehículo. Intente de nuevo."
-            );
+                (typeof err?.response?.data === "string" ? err.response.data : null);
+
+            let friendly = "No se pudo eliminar el vehículo. Intente de nuevo.";
+            if (status === 404) friendly = "El vehículo no existe o ya fue eliminado.";
+            if (status === 409) friendly = "No se puede eliminar porque tiene registros relacionados.";
+
+            setErrorMsg(serverMsg || friendly);
         } finally {
             setIsLoading(false);
         }
@@ -112,6 +129,40 @@ const DeleteVehicle = () => {
         setShowConfirm(true);
     };
 
+    const handleKeyDown = (e) => {
+        if (!suggestions.length) return;
+
+        if (e.key === "ArrowDown") {
+            e.preventDefault();
+            setActiveIndex((idx) => (idx + 1) % suggestions.length);
+            scrollActiveIntoView();
+        } else if (e.key === "ArrowUp") {
+            e.preventDefault();
+            setActiveIndex((idx) => (idx - 1 + suggestions.length) % suggestions.length);
+            scrollActiveIntoView();
+        } else if (e.key === "Enter") {
+            // Si hay sugerencias, seleccionar la activa
+            if (activeIndex >= 0) {
+                e.preventDefault();
+                handleSelectSuggestion(suggestions[activeIndex]);
+            }
+        } else if (e.key === "Escape") {
+            setSuggestions([]);
+            setActiveIndex(-1);
+        }
+    };
+
+    const scrollActiveIntoView = () => {
+        requestAnimationFrame(() => {
+            const list = listboxRef.current;
+            if (!list) return;
+            const el = list.querySelector('[data-active="true"]');
+            if (el && typeof el.scrollIntoView === "function") {
+                el.scrollIntoView({ block: "nearest" });
+            }
+        });
+    };
+
     return (
         <div className="deleteContainer">
             <h1>Eliminar Vehículo</h1>
@@ -119,7 +170,7 @@ const DeleteVehicle = () => {
             <form className="reportForm" onSubmit={handleSubmitOrEnter}>
                 {/* Input combinado: económico o placa */}
                 <div className="formGroup searchContainer">
-                    <label>Buscar vehiculo</label>
+                    <label>Buscar vehículo</label>
                     <input
                         type="text"
                         placeholder="Buscar por número económico o placa"
@@ -128,23 +179,43 @@ const DeleteVehicle = () => {
                             setSearchTerm(e.target.value);
                             setErrorMsg("");
                         }}
+                        onKeyDown={handleKeyDown}
+                        onBlur={() => setTimeout(() => setSuggestions([]), 120)}
                         autoComplete="off"
                         required
                     />
+
                     {suggestions.length > 0 && (
-                        <ul className="suggestionsList">
-                            {suggestions.map((v, i) => (
-                                <li
-                                    key={`${v.id || v.economical}-${i}`}
-                                    className="suggestionItem"
-                                    onClick={() => handleSelectSuggestion(v)}
-                                >
-                                    {v.economical} - {v.badge}
-                                </li>
-                            ))}
+                        <ul
+                            id="vehicle-suggestions"
+                            className="suggestionsList"
+                            role="listbox"
+                            ref={listboxRef}
+                        >
+                            {suggestions.map((v, i) => {
+                                const id = v.id ?? `${v.economical}-${v.badge}`;
+                                const isActive = i === activeIndex;
+                                return (
+                                    <li
+                                        key={id}
+                                        role="option"
+                                        aria-selected={isActive}
+                                        data-active={isActive ? "true" : "false"}
+                                        className={`suggestionItem ${isActive ? "active" : ""}`}
+                                        // onMouseDown evita que el blur del input cancele el click
+                                        onMouseDown={() => handleSelectSuggestion(v)}
+                                    >
+                                        {v.economical} - {v.badge}
+                                    </li>
+                                );
+                            })}
                         </ul>
                     )}
-                    {errorMsg && <div className="error">{errorMsg}</div>}
+
+                    <div className="helpRow">
+                        {isSearching && <span className="hint">Buscando…</span>}
+                        {errorMsg && <div className="error">{errorMsg}</div>}
+                    </div>
                 </div>
 
                 {/* Vista previa */}
@@ -172,10 +243,10 @@ const DeleteVehicle = () => {
 
             {/* Modal de confirmación */}
             {showConfirm && vehicle && !vehicle.__deleted && (
-                <div className="modalOverlay">
+                <div className="modalOverlay" role="dialog" aria-modal="true" aria-labelledby="confirm-title">
                     <div className="modalContent">
                         <div className="modalIcon">🗑️</div>
-                        <h2 className="modalTitle">Confirmar eliminación</h2>
+                        <h2 className="modalTitle" id="confirm-title">Confirmar eliminación</h2>
                         <p className="modalMessage">
                             ¿Seguro que deseas eliminar el vehículo <strong>{vehicle.economical}</strong>
                             {vehicle.badge ? ` (placa ${vehicle.badge})` : ""}? Esta acción no se puede deshacer.
@@ -199,7 +270,7 @@ const DeleteVehicle = () => {
 
             {/* Modal de éxito */}
             {vehicle?.__deleted && (
-                <div className="modalOverlay">
+                <div className="modalOverlay" role="dialog" aria-modal="true">
                     <div className="modalContent success">
                         <div className="modalIcon">✅</div>
                         <h2 className="modalTitle">Vehículo eliminado</h2>

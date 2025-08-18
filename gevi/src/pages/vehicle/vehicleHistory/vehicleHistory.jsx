@@ -1,49 +1,53 @@
 import React, { useState, useEffect } from "react";
-import './vehicleHistory.css';
+import "./vehicleHistory.css";
 import axios from "axios";
 
+/* ========= Hook de cronómetro a nivel de módulo ========= */
+function formatElapsed(totalSeconds) {
+  const d = Math.floor(totalSeconds / 86400);
+  const h = String(Math.floor((totalSeconds % 86400) / 3600)).padStart(2, "0");
+  const m = String(Math.floor((totalSeconds % 3600) / 60)).padStart(2, "0");
+  const s = String(totalSeconds % 60).padStart(2, "0");
+  return d > 0 ? `${d}d ${h}:${m}:${s}` : `${h}:${m}:${s}`;
+}
+
+function useElapsedTimer(startKey, startTimeISO) {
+  const [elapsed, setElapsed] = useState(0);
+
+  useEffect(() => {
+    const startMs = Date.parse(startTimeISO);
+    if (Number.isNaN(startMs)) return;
+
+    const id = setInterval(() => {
+      const now = Date.now();
+      setElapsed(Math.max(0, Math.floor((now - startMs) / 1000)));
+    }, 1000);
+
+    return () => clearInterval(id);
+  }, [startKey, startTimeISO]);
+
+  return formatElapsed(elapsed);
+}
+
+/* ===================== Componente principal ===================== */
 const VehicleHistory = () => {
   // ===== Estados =====
-  const [searchTerm, setSearchTerm] = useState('');
+  const [searchTerm, setSearchTerm] = useState("");
   const [filteredReports, setFilteredReports] = useState([]);
   const [suggestions, setSuggestions] = useState([]);
   const [allSuggestions, setAllSuggestions] = useState([]);
-
-  // ===== Hook para cronómetro =====
-  const useTimer = (startKey, startTime) => {
-    const [elapsed, setElapsed] = useState(0);
-
-    useEffect(() => {
-      const start = Date.parse(startTime);
-      const interval = setInterval(() => {
-        const now = Date.now();
-        setElapsed(Math.floor((now - start) / 1000));
-      }, 1000);
-
-      return () => clearInterval(interval);
-    }, [startKey, startTime]);
-
-    const format = (seconds) => {
-      const days = Math.floor(seconds / 86400);
-      const h = String(Math.floor((seconds % 86400) / 3600)).padStart(2, '0');
-      const m = String(Math.floor((seconds % 3600) / 60)).padStart(2, '0');
-      const s = String(seconds % 60).padStart(2, '0');
-
-      return days > 0 ? `${days}d ${h}:${m}:${s}` : `${h}:${m}:${s}`;
-    };
-
-    return format(elapsed);
-  };
+  const [isLoading, setIsLoading] = useState(false);
 
   // ===== Obtener sugerencias al iniciar =====
   useEffect(() => {
     const fetchSuggestions = async () => {
       try {
         const token = localStorage.getItem("token");
-        const response = await axios.get("http://localhost:8080/api/reports/history/suggestions", {
-          headers: { Authorization: `Bearer ${token}` }
-        });
-        setAllSuggestions(response.data);
+        const response = await axios.get(
+          "http://localhost:8080/api/reports/history/suggestions",
+          { headers: { Authorization: `Bearer ${token}` } }
+        );
+        setAllSuggestions(response.data || []);
       } catch (error) {
         console.error("Error al cargar sugerencias:", error);
       }
@@ -54,68 +58,90 @@ const VehicleHistory = () => {
 
   // ===== Filtrar sugerencias =====
   useEffect(() => {
-    if (searchTerm) {
-      const matches = allSuggestions.filter(suggestion =>
-        suggestion.toLowerCase().includes(searchTerm.toLowerCase())
-      );
-      setSuggestions(matches);
+    if (searchTerm?.trim()) {
+      const q = searchTerm.toLowerCase();
+      setSuggestions(allSuggestions.filter((s) => s.toLowerCase().includes(q)));
     } else {
       setSuggestions([]);
     }
   }, [searchTerm, allSuggestions]);
 
-  // ===== Buscar reportes =====
-  const handleSelectSuggestion = async (text) => {
-    setSearchTerm(text);
-    setSuggestions([]);
+  // ===== Lógica de búsqueda (reutilizable) =====
+  const performSearch = async (text) => {
+    if (!text?.trim()) return;
 
+    setIsLoading(true);
+    setSuggestions([]);
     try {
       const token = localStorage.getItem("token");
       const [econ] = text.split(" - ");
-      const response = await axios.get(`http://localhost:8080/api/reports/history?search=${econ.trim()}`, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
+      const search = (econ ?? text).trim();
 
+      const response = await axios.get(
+        `http://localhost:8080/api/reports/history?search=${encodeURIComponent(
+          search
+        )}`,
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+
+      const data = Array.isArray(response.data) ? response.data : [];
+
+      // Último reporte por vehículo
       const lastByVehicle = {};
-      response.data.forEach(r => {
-        const key = r.economical;
-        const reportDate = new Date(`${r.date}T${r.hour}`);
-        if (!lastByVehicle[key] || reportDate > new Date(`${lastByVehicle[key].date}T${lastByVehicle[key].hour}`)) {
-          lastByVehicle[key] = r;
+      for (const r of data) {
+        const when = new Date(`${r.date}T${r.hour}`);
+        const k = r.economical;
+        const prev = lastByVehicle[k];
+        if (!prev || when > new Date(`${prev.date}T${prev.hour}`)) {
+          lastByVehicle[k] = r;
         }
-      });
+      }
 
-      const enrichedReports = response.data.map(r => {
-        const isLatest = r.id === lastByVehicle[r.economical].id;
-        let formattedElapsedTime = null;
+      // Enriquecer y ordenar por fecha/hora desc
+      const enriched = data
+        .map((r) => {
+          const isLatest = r.id === lastByVehicle[r.economical]?.id;
+          let formattedElapsedTime = null;
+          if (!isLatest && r.timeElapsed != null) {
+            formattedElapsedTime = formatElapsed(Number(r.timeElapsed) || 0);
+          }
+          return { ...r, isLatest, formattedElapsedTime };
+        })
+        .sort(
+          (a, b) =>
+            new Date(`${b.date}T${b.hour}`) - new Date(`${a.date}T${a.hour}`)
+        );
 
-        if (!isLatest && r.timeElapsed !== null && r.timeElapsed !== undefined) {
-          const total = r.timeElapsed;
-          const d = Math.floor(total / 86400);
-          const h = String(Math.floor((total % 86400) / 3600)).padStart(2, '0');
-          const m = String(Math.floor((total % 3600) / 60)).padStart(2, '0');
-          const s = String(total % 60).padStart(2, '0');
-          formattedElapsedTime = d > 0 ? `${d}d ${h}:${m}:${s}` : `${h}:${m}:${s}`;
-        }
-
-        return {
-          ...r,
-          isLatest,
-          formattedElapsedTime
-        };
-      });
-
-      setFilteredReports(enrichedReports);
+      setFilteredReports(enriched);
     } catch (error) {
       console.error("Error al obtener historial de reportes:", error);
       setFilteredReports([]);
+    } finally {
+      setIsLoading(false);
     }
+  };
+
+  // ===== Handlers =====
+  const handleSelectSuggestion = (text) => {
+    setSearchTerm(text);
+    performSearch(text);
   };
 
   const handleSearchChange = (e) => setSearchTerm(e.target.value);
 
+  const handleKeyDown = (e) => {
+    if (e.key === "Enter") {
+      e.preventDefault();
+      if (suggestions.length > 0) {
+        handleSelectSuggestion(suggestions[0]);
+      } else {
+        performSearch(searchTerm);
+      }
+    }
+  };
+
   const handleClear = () => {
-    setSearchTerm('');
+    setSearchTerm("");
     setSuggestions([]);
     setFilteredReports([]);
   };
@@ -137,16 +163,17 @@ const VehicleHistory = () => {
                 placeholder="Buscar por número económico o placa"
                 value={searchTerm}
                 onChange={handleSearchChange}
-                onBlur={() => setTimeout(() => setSuggestions([]), 100)}
+                onKeyDown={handleKeyDown}
+                onBlur={() => setTimeout(() => setSuggestions([]), 120)}
                 autoComplete="off"
               />
               {suggestions.length > 0 && (
                 <ul className="suggestionsList">
-                  {suggestions.map((item, index) => (
+                  {suggestions.map((item) => (
                     <li
-                      key={index}
+                      key={item}
                       className="suggestionItem"
-                      onClick={() => handleSelectSuggestion(item)}
+                      onMouseDown={() => handleSelectSuggestion(item)}
                     >
                       {item}
                     </li>
@@ -154,7 +181,9 @@ const VehicleHistory = () => {
                 </ul>
               )}
             </div>
-            <button className="clearBtn" onClick={handleClear}>Limpiar</button>
+            <button className="clearBtn" onClick={handleClear} disabled={isLoading}>
+              {isLoading ? "Buscando..." : "Limpiar"}
+            </button>
           </div>
         </div>
       </div>
@@ -162,67 +191,102 @@ const VehicleHistory = () => {
       {/* Lista de reportes */}
       <div className="reportsList">
         {filteredReports.length > 0 ? (
-          filteredReports.map(report => (
-            <ReportCard key={report.id} report={report} useTimer={useTimer} />
+          filteredReports.map((report) => (
+            <ReportCard key={report.id} report={report} />
           ))
         ) : searchTerm ? (
-          <div className="noReports">No se encontraron reportes para "{searchTerm}"</div>
+          <div className="noReports">
+            {isLoading
+              ? "Buscando reportes..."
+              : `No se encontraron reportes para "${searchTerm}"`}
+          </div>
         ) : (
-          <div className="noReports">Ingrese un número económico o placa para buscar reportes</div>
+          <div className="noReports">
+            Ingrese un número económico o placa para buscar reportes
+          </div>
         )}
       </div>
     </div>
   );
 };
 
-// ===== Subcomponente para tarjeta de reporte =====
-const ReportCard = ({ report, useTimer }) => {
-  const timer = useTimer(`${report.economical}-${report.id}`, `${report.date}T${report.hour}`);
+/* ============ Subcomponente: tarjeta de reporte ============ */
+const ReportCard = ({ report }) => {
+  const timer = useElapsedTimer(
+    `${report.economical}-${report.id}`,
+    `${report.date}T${report.hour}`
+  );
+
+  const mileageStr =
+    report?.mileage != null && !Number.isNaN(Number(report.mileage))
+      ? Number(report.mileage).toLocaleString()
+      : "-";
+
+  const locationText =
+    report.locationUnavailable ?? report.location ?? report.localitation ?? null;
+
+  const showLocation =
+    (report.newState?.toUpperCase?.() === "INDISPONIBLE") && !!locationText;
+
+  const failText = report.failType || report.motivo || null;
 
   return (
     <div className="reportCard">
       <div className="reportHeader">
-        <span className="vehicleInfo">{report.economical} - {report.badge}</span>
-        <span className="reportDate">{report.date} | {report.hour}</span>
+        <span className="vehicleInfo">
+          {report.economical} - {report.badge}
+        </span>
+        <span className="reportDate">
+          {report.date} | {report.hour}
+        </span>
       </div>
 
       <div className="statusChange">
-        <span className={`statusBadge oldNew ${report.previousState.toLowerCase().replace(/\s+/g, '_')}`}>
+        <span
+          className={`statusBadge oldNew ${String(report.previousState || "")
+            .toLowerCase()
+            .replace(/\s+/g, "_")}`}
+        >
           {report.previousState}
         </span>
         <span className="arrow">→</span>
-        <span className={`statusBadge oldNew ${report.newState.toLowerCase().replace(/\s+/g, '_')}`}>
+        <span
+          className={`statusBadge oldNew ${String(report.newState || "")
+            .toLowerCase()
+            .replace(/\s+/g, "_")}`}
+        >
           {report.newState}
         </span>
       </div>
 
       <div className="detailRow">
-        <strong>Kilometraje:</strong> <span>{report.mileage.toLocaleString()} km</span>
+        <strong>Kilometraje:</strong> <span>{mileageStr} km</span>
       </div>
 
-      {report.newState.toLowerCase() === 'indisponible' && report.localitation && (
+      {showLocation && (
         <div className="detailRow">
-          <strong>Ubicación:</strong> <span>{report.localitation}</span>
+          <strong>Ubicación:</strong> <span>{locationText}</span>
         </div>
       )}
 
-      {(report.failType || report.motivo) && (
+      {failText && (
         <div className="detailRow">
-          <strong>Falla:</strong> <span>{report.failType}</span>
+          <strong>Falla:</strong> <span>{failText}</span>
         </div>
       )}
 
-      <div className="detailRow">
-        <strong>Tiempo transcurrido:</strong>{' '}
-        {report.isLatest ? (
-          <span className="statusBadge timer">{timer}</span>
-        ) : report.formattedElapsedTime ? (
-          <span className="statusBadge timer">{report.formattedElapsedTime}</span>
-        ) : null}
-      </div>
+      {(report.isLatest || report.formattedElapsedTime) && (
+        <div className="detailRow">
+          <strong>Tiempo transcurrido:</strong>{" "}
+          <span className="statusBadge timer">
+            {report.isLatest ? timer : report.formattedElapsedTime}
+          </span>
+        </div>
+      )}
 
       <div className="reportedBy">
-        Reportado por: {report.reportedBy} <span className="rpe">({report.rpe})</span>
+        Reportado por: {report.reportedBy}{" "}
+        <span className="rpe">({report.rpe})</span>
       </div>
     </div>
   );

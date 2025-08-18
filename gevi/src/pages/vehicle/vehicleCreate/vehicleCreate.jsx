@@ -1,9 +1,11 @@
 // src/components/AddVehicle.jsx
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
-import './vehicleCreate.css'; // reutilizamos el mismo estilo
+import './vehicleCreate.css';
 
 const AddVehicle = () => {
+  const currentYear = new Date().getFullYear();
+
   // Campos que espera el backend (VehicleRequest)
   const [formData, setFormData] = useState({
     economical: '',
@@ -19,7 +21,6 @@ const AddVehicle = () => {
 
   const [workCenters, setWorkCenters] = useState([]);
   const [processes, setProcesses] = useState([]);
-  const [errors, setErrors] = useState({});
   const [apiError, setApiError] = useState('');
   const [showModal, setShowModal] = useState(false);
   const [submitting, setSubmitting] = useState(false);
@@ -42,112 +43,73 @@ const AddVehicle = () => {
       });
   }, []);
 
-  // Validaciones simples en front
-  const validate = () => {
-    const e = {};
-    const currentYear = new Date().getFullYear();
-
-    // --- mileage: 1-6 dígitos y número válido ---
-    const mileageStr = String(formData.mileage ?? '').trim();
-    const mileageNum = mileageStr === '' ? NaN : parseInt(mileageStr, 10);
-
-    if (mileageStr === '') {
-      e.mileage = 'Requerido';
-    } else if (!/^\d{1,6}$/.test(mileageStr)) {
-      e.mileage = 'Máximo 6 dígitos (solo números)';
-    } else if (Number.isNaN(mileageNum) || mileageNum < 0) {
-      e.mileage = 'Debe ser un número entero positivo';
-    }
-
-    // --- year: exactamente 4 dígitos en rango ---
-    const yearStr = String(formData.year ?? '').trim();
-    const yearNum = yearStr === '' ? NaN : parseInt(yearStr, 10);
-
-    if (yearStr === '') {
-      e.year = 'Requerido';
-    } else if (!/^\d{4}$/.test(yearStr)) {
-      e.year = 'Debe tener exactamente 4 dígitos';
-    } else if (Number.isNaN(yearNum) || yearNum < 1900 || yearNum > currentYear) {
-      e.year = `Debe estar entre 1900 y ${currentYear}`;
-    }
-    
-    return e;
-  };
-
-
+  // Helpers de validación nativa (globitos)
+  const setInvalidMsg = (e, msg) => e.target.setCustomValidity(msg);
+  const clearInvalidMsg = (e) => e.target.setCustomValidity('');
 
   const handleChange = (e) => {
     const { name, value } = e.target;
 
     if (name === 'economical') {
-      // Solo números
+      // Solo números (sin límite específico)
       const numericValue = value.replace(/\D/g, '');
-      setFormData((prev) => ({
-        ...prev,
-        [name]: numericValue
-      }));
+      setFormData((prev) => ({ ...prev, [name]: numericValue }));
+      return;
     }
-    else if (name === 'year') {
-      // Solo números y máximo 4 dígitos
-      const numericValue = value.replace(/\D/g, '').slice(0, 4);
-      setFormData((prev) => ({
-        ...prev,
-        [name]: numericValue
-      }));
+
+    if (name === 'year') {
+      // Número (dejamos que min/max hagan el trabajo del rango)
+      const numericValue = value.replace(/[^\d-]/g, ''); // por si el navegador permite e/-
+      setFormData((prev) => ({ ...prev, [name]: numericValue }));
+      return;
     }
-    else if (name === 'mileage') {
-      // Solo números y máximo 6 dígitos
-      const numericValue = value.replace(/\D/g, '').slice(0, 6);
-      setFormData((prev) => ({
-        ...prev,
-        [name]: numericValue
-      }));
+
+    if (name === 'mileage') {
+      // Número, max 999999 (rango nativo)
+      const numericValue = value.replace(/[^\d-]/g, '');
+      setFormData((prev) => ({ ...prev, [name]: numericValue }));
+      return;
     }
-    else if (['workCenterId', 'processId'].includes(name)) {
+
+    if (['workCenterId', 'processId'].includes(name)) {
       setFormData((prev) => ({
         ...prev,
         [name]: value === '' ? '' : Number(value)
       }));
+      return;
     }
-    else if (['brand', 'model'].includes(name)) {
-      // Siempre mayúsculas
-      setFormData((prev) => ({
-        ...prev,
-        [name]: value.toUpperCase()
-      }));
+
+    if (['brand', 'model'].includes(name)) {
+      setFormData((prev) => ({ ...prev, [name]: value.toUpperCase() }));
+      return;
     }
-    else if (name === 'badge') {
+
+    if (name === 'badge') {
       // Mayúsculas y máximo 7 caracteres
-      setFormData((prev) => ({
-        ...prev,
-        [name]: value.toUpperCase().slice(0, 7)
-      }));
-    }
-    else {
-      setFormData((prev) => ({
-        ...prev,
-        [name]: value
-      }));
+      setFormData((prev) => ({ ...prev, [name]: value.toUpperCase().slice(0, 7) }));
+      return;
     }
 
-    // Limpia el error del campo
-    setErrors((prev) => ({ ...prev, [name]: undefined }));
+    setFormData((prev) => ({ ...prev, [name]: value }));
   };
-
-
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setApiError('');
-    const v = validate();
-    setErrors(v);
-    if (Object.keys(v).length) return;
 
     try {
       setSubmitting(true);
       const token = localStorage.getItem('token');
-      await axios.post('http://localhost:8080/api/vehicles', formData, {
-        headers: { Authorization: `Bearer ${token}` }
+
+      const payload = {
+        ...formData,
+        // Asegura tipos numéricos para backend si los necesita como number
+        mileage: formData.mileage === '' ? '' : Number(formData.mileage),
+        year: formData.year === '' ? '' : Number(formData.year),
+      };
+
+      await axios.post('http://localhost:8080/api/vehicles', payload, {
+        headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' }
       });
 
       setShowModal(true);
@@ -188,12 +150,14 @@ const AddVehicle = () => {
             name="economical"
             value={formData.economical}
             onChange={handleChange}
+            onInvalid={(e) => setInvalidMsg(e, 'Ingrese solo números')}
+            onInput={clearInvalidMsg}
             placeholder="EJ. 34567"
             autoComplete="off"
             inputMode="numeric"
+            pattern="^\d+$"
             required
           />
-          {errors.economical && <div className="error">{errors.economical}</div>}
         </div>
 
         {/* Placa */}
@@ -204,23 +168,32 @@ const AddVehicle = () => {
             name="badge"
             value={formData.badge}
             onChange={handleChange}
+            onInvalid={(e) => setInvalidMsg(e, 'La placa debe tener exactamente 7 caracteres (A-Z, 0-9)')}
+            onInput={clearInvalidMsg}
             placeholder="Ej. ABC1234"
             autoComplete="off"
             maxLength={7}
+            pattern="^[A-Z0-9]{7}$"
+            title="7 caracteres alfanuméricos en mayúsculas (A-Z, 0-9)"
             required
           />
-          {errors.badge && <div className="error">{errors.badge}</div>}
         </div>
 
         {/* Propiedad */}
         <div className="formGroup">
           <label>Propiedad</label>
-          <select name="property" value={formData.property} onChange={handleChange}required>
+          <select
+            name="property"
+            value={formData.property}
+            onChange={handleChange}
+            onInvalid={(e) => setInvalidMsg(e, 'Seleccione una opción')}
+            onInput={clearInvalidMsg}
+            required
+          >
             <option value="">Seleccione propiedad</option>
             <option value="PROPIO">PROPIO</option>
             <option value="ARRENDADO">ARRENDADO</option>
           </select>
-          {errors.property && <div className="error">{errors.property}</div>}
         </div>
 
         {/* Kilometraje */}
@@ -231,11 +204,14 @@ const AddVehicle = () => {
             name="mileage"
             value={formData.mileage}
             onChange={handleChange}
+            onInvalid={(e) => setInvalidMsg(e, 'Ingrese un número entre 0 y 999999')}
+            onInput={clearInvalidMsg}
             placeholder="Ej. 120000"
-            maxLength={6}
+            min="0"
+            max="999999"
+            step="1"
             required
           />
-          {errors.mileage && <div className="error">{errors.mileage}</div>}
         </div>
 
         {/* Marca */}
@@ -246,11 +222,12 @@ const AddVehicle = () => {
             name="brand"
             value={formData.brand}
             onChange={handleChange}
+            onInvalid={(e) => setInvalidMsg(e, 'Ingrese la marca')}
+            onInput={clearInvalidMsg}
             placeholder="Ej. FORD"
             autoComplete="off"
             required
           />
-          {errors.brand && <div className="error">{errors.brand}</div>}
         </div>
 
         {/* Modelo */}
@@ -261,11 +238,12 @@ const AddVehicle = () => {
             name="model"
             value={formData.model}
             onChange={handleChange}
+            onInvalid={(e) => setInvalidMsg(e, 'Ingrese el modelo')}
+            onInput={clearInvalidMsg}
             placeholder="Ej. F-150"
             autoComplete="off"
             required
           />
-          {errors.model && <div className="error">{errors.model}</div>}
         </div>
 
         {/* Año */}
@@ -276,11 +254,14 @@ const AddVehicle = () => {
             name="year"
             value={formData.year}
             onChange={handleChange}
+            onInvalid={(e) => setInvalidMsg(e, `Ingrese un año entre 1900 y ${currentYear}`)}
+            onInput={clearInvalidMsg}
             placeholder="Ej. 2019"
-            maxLength={4}
+            min="1900"
+            max={currentYear}
+            step="1"
             required
           />
-          {errors.year && <div className="error">{errors.year}</div>}
         </div>
 
         {/* Centro de trabajo */}
@@ -290,6 +271,8 @@ const AddVehicle = () => {
             name="workCenterId"
             value={formData.workCenterId}
             onChange={handleChange}
+            onInvalid={(e) => setInvalidMsg(e, 'Seleccione un centro de trabajo')}
+            onInput={clearInvalidMsg}
             required
           >
             <option value="">Seleccione centro de trabajo</option>
@@ -299,7 +282,6 @@ const AddVehicle = () => {
               </option>
             ))}
           </select>
-          {errors.workCenterId && <div className="error">{errors.workCenterId}</div>}
         </div>
 
         {/* Proceso */}
@@ -309,6 +291,8 @@ const AddVehicle = () => {
             name="processId"
             value={formData.processId}
             onChange={handleChange}
+            onInvalid={(e) => setInvalidMsg(e, 'Seleccione un proceso')}
+            onInput={clearInvalidMsg}
             required
           >
             <option value="">Seleccione proceso</option>
@@ -318,7 +302,6 @@ const AddVehicle = () => {
               </option>
             ))}
           </select>
-          {errors.processId && <div className="error">{errors.processId}</div>}
         </div>
 
         {/* Error API */}
@@ -330,7 +313,7 @@ const AddVehicle = () => {
         </button>
       </form>
 
-      {/* Modal de éxito (mismo estilo que reportar vehículo) */}
+      {/* Modal de éxito */}
       {showModal && (
         <div className="modalOverlay">
           <div className="modalContent success">

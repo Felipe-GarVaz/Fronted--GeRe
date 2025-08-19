@@ -73,12 +73,6 @@ const RegisteredDevice = () => {
 
       {/* Contadores */}
       <div className="DeviceCounters">
-        <div className="counterBox Total">
-          <strong>Total Dispositivos:</strong> {totalDevices}
-        </div>
-        <div className="counterBox TotalDamaged">
-          <strong>Total Dañados:</strong> {totalDamaged}
-        </div>
         <div className="counterBox TPNewland">
           <strong>TP Newland:</strong> {totals.tpNewland}<br />
           <span className="damaged">Dañados: {totals.tpNewlandDamaged}</span>
@@ -94,6 +88,12 @@ const RegisteredDevice = () => {
         <div className="counterBox LectorDolfin">
           <strong>Lector Dolfin 9900:</strong> {totals.readerDolphin9900}<br />
           <span className="damaged">Dañados: {totals.readerDolphin9900Damaged}</span>
+        </div>
+        <div className="counterBox TotalDamaged">
+          <strong>Total Dañados:</strong> {totalDamaged}
+        </div>
+        <div className="counterBox Total">
+          <strong>Total Dispositivos:</strong> {totalDevices}
         </div>
       </div>
 

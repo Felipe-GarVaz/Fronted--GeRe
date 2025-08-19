@@ -308,7 +308,6 @@ const VehicleReport = () => {
           )}
         </div>
 
-        {/* 🔧 Aquí estaba el bug: usabas formData.economico */}
         {formData.economical && (
           <>
             <div className="vehicleInfoBox">
@@ -382,7 +381,7 @@ const VehicleReport = () => {
                       name="personalizedFailure"
                       value={formData.personalizedFailure}
                       onChange={handleChange}
-                      placeholder="DESCRIBA LA FALLA DETECTADA"
+                      placeholder="Describa la falla detectada"
                       required
                     />
                   </div>

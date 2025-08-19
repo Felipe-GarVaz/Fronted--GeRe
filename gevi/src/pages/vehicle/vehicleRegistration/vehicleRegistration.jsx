@@ -91,7 +91,7 @@ const RegisteredVehicles = () => {
                 <div className="searchGroup">
                     <label>Buscar por Económico:</label>
                     <input
-                        type="text"
+                        type="number"
                         name="search"
                         placeholder="Ej: 23245"
                         value={filters.search}

@@ -4,7 +4,22 @@ import axios from "axios";
 import "./deviceDelete.css";
 
 const API_BASE = "http://localhost:8080/api";
-const getType = (x) => x?.type ?? x?.deviceType ?? x?.tipo ?? x?.typeName ?? null;
+const getTypeRaw = (x) => x?.type ?? x?.deviceType ?? x?.tipo ?? x?.typeName ?? null;
+const formatType = (t) =>
+    t
+        ? t
+            .toUpperCase()
+            .split("_")
+            .map((w) => (w.length <= 2 ? w : w.charAt(0) + w.slice(1).toUpperCase()))
+            .join(" ")
+        : "";
+
+const getWorkCenterName = (d) => {
+    const wc = d?.workCenter;
+    if (!wc) return "";
+    if (typeof wc === "string") return wc;
+    return wc.name || "";
+};
 
 const DeleteDevice = () => {
     const [searchTerm, setSearchTerm] = useState("");
@@ -17,9 +32,6 @@ const DeleteDevice = () => {
     const [errorMsg, setErrorMsg] = useState("");
     const hasSelectedSuggestion = useRef(false);
     const listboxRef = useRef(null);
-
-
-
 
     // ===== Buscar sugerencias por NÚMERO DE SERIE (debounce + cancelación)
     useEffect(() => {
@@ -74,7 +86,8 @@ const DeleteDevice = () => {
 
     const handleSelectSuggestion = (d) => {
         hasSelectedSuggestion.current = true;
-        setSearchTerm(`${d.serialNumber}${d.type ? " - " + d.type : ""}`);
+        const typeLabel = formatType(getTypeRaw(d));
+        setSearchTerm(`${d.serialNumber}${typeLabel ? " - " + typeLabel : ""}`);
         setDevice(d);
         setSuggestions([]);
         setActiveIndex(-1);
@@ -110,6 +123,7 @@ const DeleteDevice = () => {
                 (typeof err?.response?.data === "string" ? err.response.data : null);
 
             let friendly = "No se pudo eliminar el dispositivo. Intente de nuevo.";
+            if (status === 401 || status === 403) friendly = "Sesión expirada o sin permisos.";
             if (status === 404) friendly = "El dispositivo no existe o ya fue eliminado.";
             if (status === 409) friendly = "No se puede eliminar porque tiene registros relacionados.";
 
@@ -160,6 +174,9 @@ const DeleteDevice = () => {
             }
         });
     };
+    
+    const deviceType = formatType(getTypeRaw(device));
+    const workCenterName = getWorkCenterName(device);
 
     return (
         <div className="deleteContainer">
@@ -191,11 +208,13 @@ const DeleteDevice = () => {
                             ref={listboxRef}
                         >
                             {suggestions.map((d, i) => {
-                                const id = d.id ?? d.serialNumber ?? i;
+                                const baseId = d.id ?? d.serialNumber ?? i;
+                                const optId = `device-opt-${baseId}`;
                                 const isActive = i === activeIndex;
                                 return (
                                     <li
-                                        key={id}
+                                        id={optId}
+                                        key={baseId}
                                         role="option"
                                         aria-selected={isActive}
                                         data-active={isActive ? "true" : "false"}
@@ -219,10 +238,9 @@ const DeleteDevice = () => {
                 {device && !device.__deleted && (
                     <div className="deviceInfoBox">
                         <p><strong>Serie:</strong> {device.serialNumber}</p>
-                        {device.type && <p><strong>Tipo:</strong> {device.type}</p>}
-                        {getType(device) && <p><strong>Tipo:</strong> {getType(device)}</p>}
-                        {device.status && <p><strong>Estado:</strong> {device.status}</p>}
-                        {device.workCenter?.name && <p><strong>Centro de trabajo:</strong> {device.workCenter.name}</p>}
+                        {deviceType && <p><strong>Tipo:</strong> {deviceType}</p>}
+                        {device?.status && <p><strong>Estado:</strong> {device.status}</p>}
+                        {workCenterName && <p><strong>Centro de trabajo:</strong> {workCenterName}</p>}
                     </div>
                 )}
 

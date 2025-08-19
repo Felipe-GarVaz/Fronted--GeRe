@@ -1,20 +1,9 @@
-// src/components/AddDevice.jsx
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import './deviceCreate.css';
 
-const API_BASE = 'http://localhost:8080/api';
-const WC_ENDPOINT = `${API_BASE}/workCenter`;
-const DEVICES_ENDPOINT = `${API_BASE}/devices`;
-
-const DEVICE_TYPES = [
-  'TP_NEWLAND',
-  'LECTOR_NEWLAND',
-  'TP_DOLPHIN_9900',
-  'LECTOR_DOLPHIN_9900'
-];
-
 const AddDevice = () => {
+  // Campos que espera el backend (DeviceRequest)
   const [formData, setFormData] = useState({
     serialNumber: '',
     deviceType: '',
@@ -22,75 +11,82 @@ const AddDevice = () => {
   });
 
   const [workCenters, setWorkCenters] = useState([]);
-  const [errors, setErrors] = useState({});
   const [apiError, setApiError] = useState('');
   const [showModal, setShowModal] = useState(false);
   const [submitting, setSubmitting] = useState(false);
 
+  // Catálogos
   useEffect(() => {
     const token = localStorage.getItem('token');
-    const headers = token ? { Authorization: `Bearer ${token}` } : {};
+    const headers = { Authorization: `Bearer ${token}` };
 
-    axios
-      .get(WC_ENDPOINT, { headers })
-      .then((wcRes) => {
-        setWorkCenters(wcRes?.data || []);
+    Promise.all([
+      axios.get('http://localhost:8080/api/workCenter', { headers })
+      // Si luego agregas otro catálogo (p. ej. modelos de dispositivo), añádelo aquí
+    ])
+      .then(([wcRes]) => {
+        setWorkCenters(wcRes.data || []);
       })
       .catch((err) => {
-        console.error('Error cargando centros de trabajo:', err);
+        console.error('Error cargando catálogos:', err);
       });
   }, []);
 
-  const validate = () => {
-    const e = {};
-    const sn = String(formData.serialNumber || '').trim();
-    if (sn === '') {
-      e.serialNumber = 'Requerido';
-    } else if (!/^[A-Z0-9-]{3,50}$/.test(sn)) {
-      e.serialNumber = 'Use A-Z, 0-9 o guión (3-50)';
-    }
-
-    if (!formData.deviceType) e.deviceType = 'Seleccione tipo';
-
-    if (!formData.workCenterId && formData.workCenterId !== 0) {
-      e.workCenterId = 'Seleccione centro de trabajo';
-    }
-
-    return e;
-  };
+  // Helpers de validación nativa (globitos)
+  const setInvalidMsg = (e, msg) => e.target.setCustomValidity(msg);
+  const clearInvalidMsg = (e) => e.target.setCustomValidity('');
 
   const handleChange = (e) => {
     const { name, value } = e.target;
 
     if (name === 'serialNumber') {
+      // Mayúsculas, permitir A-Z, 0-9 y guion, largo máx 50
       const normalized = value.toUpperCase().replace(/[^A-Z0-9-]/g, '').slice(0, 50);
-      setFormData((prev) => ({ ...prev, serialNumber: normalized }));
-    } else if (name === 'workCenterId') {
-      setFormData((prev) => ({ ...prev, workCenterId: value === '' ? '' : Number(value) }));
-    } else if (name === 'deviceType') {
-      setFormData((prev) => ({ ...prev, deviceType: value }));
+      setFormData((prev) => ({ ...prev, [name]: normalized }));
+      return;
     }
 
-    setErrors((prev) => ({ ...prev, [name]: undefined }));
+    if (name === 'workCenterId') {
+      setFormData((prev) => ({
+        ...prev,
+        [name]: value === '' ? '' : Number(value)
+      }));
+      return;
+    }
+
+    if (name === 'deviceType') {
+      setFormData((prev) => ({ ...prev, [name]: value }));
+      return;
+    }
+
+    setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setApiError('');
 
-    const v = validate();
-    setErrors(v);
-    if (Object.keys(v).length) return;
-
     try {
       setSubmitting(true);
       const token = localStorage.getItem('token');
-      const headers = token ? { Authorization: `Bearer ${token}` } : {};
 
-      await axios.post(DEVICES_ENDPOINT, { ...formData, status: 'ACTIVO' }, { headers });
+      // Payload listo para backend
+      const payload = {
+        ...formData,
+        status: 'ACTIVO'
+      };
+
+      await axios.post('http://localhost:8080/api/device', payload, {
+        headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' }
+      });
 
       setShowModal(true);
-      setFormData({ serialNumber: '', deviceType: '', workCenterId: '' });
+      // limpiar formulario
+      setFormData({
+        serialNumber: '',
+        deviceType: '',
+        workCenterId: ''
+      });
     } catch (err) {
       console.error('Error al registrar dispositivo:', err);
       const code = err?.response?.status;
@@ -111,6 +107,7 @@ const AddDevice = () => {
       <h1>Registrar Nuevo Dispositivo</h1>
 
       <form onSubmit={handleSubmit} className="reportForm">
+        {/* Número de serie */}
         <div className="formGroup">
           <label>Número de serie</label>
           <input
@@ -118,39 +115,45 @@ const AddDevice = () => {
             name="serialNumber"
             value={formData.serialNumber}
             onChange={handleChange}
+            onInvalid={(e) => setInvalidMsg(e, 'Use letras mayúsculas, números o guiones (3-50)')}
+            onInput={clearInvalidMsg}
             placeholder="Ej. ABC-123456"
             autoComplete="off"
-            required
-            pattern="[A-Za-z0-9-]{3,50}"
+            inputMode="text"
+            pattern="^[A-Z0-9-]{3,50}$"
             title="Use letras, números o guiones (3-50)"
+            required
           />
-          {errors.serialNumber && <div className="error">{errors.serialNumber}</div>}
         </div>
 
+        {/* Tipo de dispositivo */}
         <div className="formGroup">
           <label>Tipo de dispositivo</label>
           <select
             name="deviceType"
             value={formData.deviceType}
             onChange={handleChange}
+            onInvalid={(e) => setInvalidMsg(e, 'Seleccione un tipo')}
+            onInput={clearInvalidMsg}
             required
           >
             <option value="">Seleccione tipo</option>
-            {DEVICE_TYPES.map((t) => (
-              <option key={t} value={t}>
-                {t}
-              </option>
-            ))}
+            <option value="TP_NEWLAND">TP_NEWLAND</option>
+            <option value="LECTOR_NEWLAND">LECTOR_NEWLAND</option>
+            <option value="TP_DOLPHIN_9900">TP_DOLPHIN_9900</option>
+            <option value="LECTOR_DOLPHIN_9900">LECTOR_DOLPHIN_9900</option>
           </select>
-          {errors.deviceType && <div className="error">{errors.deviceType}</div>}
         </div>
 
+        {/* Centro de trabajo */}
         <div className="formGroup">
-          <label>Agencia / Centro de trabajo</label>
+          <label>Agencia</label>
           <select
             name="workCenterId"
             value={formData.workCenterId}
             onChange={handleChange}
+            onInvalid={(e) => setInvalidMsg(e, 'Seleccione un centro de trabajo')}
+            onInput={clearInvalidMsg}
             required
           >
             <option value="">Seleccione centro de trabajo</option>
@@ -160,16 +163,18 @@ const AddDevice = () => {
               </option>
             ))}
           </select>
-          {errors.workCenterId && <div className="error">{errors.workCenterId}</div>}
         </div>
 
+        {/* Error API */}
         {apiError && <div className="error" style={{ marginTop: 8 }}>{apiError}</div>}
 
+        {/* Botón */}
         <button type="submit" className="submitBtn" disabled={submitting}>
           {submitting ? 'Guardando...' : 'Guardar Dispositivo'}
         </button>
       </form>
 
+      {/* Modal de éxito */}
       {showModal && (
         <div className="modalOverlay">
           <div className="modalContent success">

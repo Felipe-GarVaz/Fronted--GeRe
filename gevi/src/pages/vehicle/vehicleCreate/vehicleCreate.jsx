@@ -1,4 +1,3 @@
-// src/components/AddVehicle.jsx
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import './vehicleCreate.css';

@@ -249,7 +249,7 @@ const DeleteVehicle = () => {
                         <h2 className="modalTitle" id="confirm-title">Confirmar eliminación</h2>
                         <p className="modalMessage">
                             ¿Seguro que deseas eliminar el vehículo <strong>{vehicle.economical}</strong>
-                            {vehicle.badge ? ` (placa ${vehicle.badge})` : ""}? Esta acción no se puede deshacer.
+                            ? Esta acción no se puede deshacer.
                         </p>
                         <div style={{ display: "flex", gap: 12, justifyContent: "center" }}>
                             <button className="modalButton" onClick={() => setShowConfirm(false)}>

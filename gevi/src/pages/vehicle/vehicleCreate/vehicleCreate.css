@@ -129,11 +129,27 @@
   background-color: #002244;
 }
 
+.createContainer .modalContent.error {
+  border-left: 6px solid #e53935;
+}
+
+.createContainer .modalContent.success {
+  border-left: 6px solid #2e7d32;
+}
+
+.createContainer .modalActions {
+  display: flex;
+  gap: 8px;
+  margin-top: 12px;
+  flex-wrap: wrap;
+}
+
 /* Animaciones */
 @keyframes fadeIn {
   from {
     background-color: rgba(0, 0, 0, 0);
   }
+
   to {
     background-color: rgba(0, 0, 0, 0.4);
   }
@@ -144,6 +160,7 @@
     transform: scale(0.8);
     opacity: 0;
   }
+
   100% {
     transform: scale(1);
     opacity: 1;

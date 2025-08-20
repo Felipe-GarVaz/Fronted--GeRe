@@ -12,7 +12,6 @@ import VehicleRegistration from "./pages/vehicle/vehicleRegistration/vehicleRegi
 import VehicleReport from './pages/vehicle/vehicleReport/vehicleReport';
 import VehicleHistory from './pages/vehicle/vehicleHistory/vehicleHistory';
 
-
 import TpsReadersMenu from './pages/tpsAndReaders/tps-ReadersMenu/tps-ReadersMenu';
 import DeviceCreate from './pages/tpsAndReaders/deviceCreate/deviceCreate';
 import DeviceDelete from './pages/tpsAndReaders/deviceDelete/deviceDelete';

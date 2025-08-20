@@ -1,9 +1,13 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import axios from 'axios';
 import './vehicleCreate.css';
 
 const AddVehicle = () => {
   const currentYear = new Date().getFullYear();
+
+  // Refs para enfocar inputs desde el modal de duplicados
+  const economicalRef = useRef(null);
+  const badgeRef = useRef(null);
 
   // Campos que espera el backend (VehicleRequest)
   const [formData, setFormData] = useState({
@@ -20,9 +24,18 @@ const AddVehicle = () => {
 
   const [workCenters, setWorkCenters] = useState([]);
   const [processes, setProcesses] = useState([]);
+
   const [apiError, setApiError] = useState('');
-  const [showModal, setShowModal] = useState(false);
+  const [showModal, setShowModal] = useState(false);        // éxito
   const [submitting, setSubmitting] = useState(false);
+
+  // NUEVO: modal de duplicados
+  const [showDupModal, setShowDupModal] = useState(false);
+  const [dupInfo, setDupInfo] = useState({
+    economical: false,
+    badge: false,
+    message: ''
+  });
 
   // Catálogos
   useEffect(() => {
@@ -50,21 +63,18 @@ const AddVehicle = () => {
     const { name, value } = e.target;
 
     if (name === 'economical') {
-      // Solo números (sin límite específico)
       const numericValue = value.replace(/\D/g, '');
       setFormData((prev) => ({ ...prev, [name]: numericValue }));
       return;
     }
 
     if (name === 'year') {
-      // Número (dejamos que min/max hagan el trabajo del rango)
-      const numericValue = value.replace(/[^\d-]/g, ''); // por si el navegador permite e/-
+      const numericValue = value.replace(/[^\d-]/g, '');
       setFormData((prev) => ({ ...prev, [name]: numericValue }));
       return;
     }
 
     if (name === 'mileage') {
-      // Número, max 999999 (rango nativo)
       const numericValue = value.replace(/[^\d-]/g, '');
       setFormData((prev) => ({ ...prev, [name]: numericValue }));
       return;
@@ -84,7 +94,6 @@ const AddVehicle = () => {
     }
 
     if (name === 'badge') {
-      // Mayúsculas y máximo 7 caracteres
       setFormData((prev) => ({ ...prev, [name]: value.toUpperCase().slice(0, 7) }));
       return;
     }
@@ -102,7 +111,6 @@ const AddVehicle = () => {
 
       const payload = {
         ...formData,
-        // Asegura tipos numéricos para backend si los necesita como number
         mileage: formData.mileage === '' ? '' : Number(formData.mileage),
         year: formData.year === '' ? '' : Number(formData.year),
       };
@@ -126,9 +134,38 @@ const AddVehicle = () => {
       });
     } catch (err) {
       console.error('Error al registrar vehículo:', err);
+
+      // Intento robusto de detección de duplicados (409 Conflict recomendado)
+      const status = err?.response?.status;
+      const body = err?.response?.data;
+      const rawMsg =
+        (typeof body === 'string' ? body : body?.message || JSON.stringify(body || {})).toString();
+
+      // Normalizamos a mayúsculas para buscar palabras clave
+      const U = rawMsg.toUpperCase();
+
+      const dupEconomical =
+        /ECON(O|Ó)MICO|ECONOMICAL|NUMERO\s+ECONOMICO|NÚMERO\s+ECONÓMICO/.test(U);
+      const dupBadge = /PLACA|BADGE|MATR(Í|I)CULA/.test(U);
+
+      // Algunos backends envían un array de errores por campo
+      const fieldErrors = body?.errors || body?.fieldErrors || {};
+      const feEco = !!(fieldErrors.economical || fieldErrors.numeroEconomico);
+      const feBadge = !!(fieldErrors.badge || fieldErrors.placa);
+
+      if (status === 409 || dupEconomical || dupBadge || feEco || feBadge) {
+        setDupInfo({
+          economical: dupEconomical || feEco,
+          badge: dupBadge || feBadge,
+          message: rawMsg
+        });
+        setShowDupModal(true);
+        return; // evitamos pintar apiError genérico
+      }
+
       const msg =
-        err?.response?.data?.message ||
-        (typeof err?.response?.data === 'string' ? err.response.data : null) ||
+        body?.message ||
+        (typeof body === 'string' ? body : null) ||
         'Ocurrió un error al registrar el vehículo.';
       setApiError(msg);
     } finally {
@@ -145,6 +182,7 @@ const AddVehicle = () => {
         <div className="formGroup">
           <label>Número económico</label>
           <input
+            ref={economicalRef}
             type="text"
             name="economical"
             value={formData.economical}
@@ -163,6 +201,7 @@ const AddVehicle = () => {
         <div className="formGroup">
           <label>Placa</label>
           <input
+            ref={badgeRef}
             type="text"
             name="badge"
             value={formData.badge}
@@ -185,7 +224,7 @@ const AddVehicle = () => {
             name="property"
             value={formData.property}
             onChange={handleChange}
-            onInvalid={(e) => setInvalidMsg(e, 'Seleccione una opción')}
+            onInvalid={(e) => setInvalidMsg(e, 'Seleccione una propiedad')}
             onInput={clearInvalidMsg}
             required
           >
@@ -253,10 +292,10 @@ const AddVehicle = () => {
             name="year"
             value={formData.year}
             onChange={handleChange}
-            onInvalid={(e) => setInvalidMsg(e, `Ingrese un año entre 1900 y ${currentYear}`)}
+            onInvalid={(e) => setInvalidMsg(e, `Ingrese un año entre 2000 y ${currentYear}`)}
             onInput={clearInvalidMsg}
             placeholder="Ej. 2019"
-            min="1900"
+            min="2000"
             max={currentYear}
             step="1"
             required
@@ -303,7 +342,7 @@ const AddVehicle = () => {
           </select>
         </div>
 
-        {/* Error API */}
+        {/* Error API genérico */}
         {apiError && <div className="error" style={{ marginTop: 8 }}>{apiError}</div>}
 
         {/* Botón */}
@@ -319,9 +358,45 @@ const AddVehicle = () => {
             <div className="modalIcon">✅</div>
             <h2 className="modalTitle">¡Vehículo Registrado!</h2>
             <p className="modalMessage">El vehículo se guardó correctamente.</p>
-            <button onClick={() => setShowModal(false)} className="modalButton">
+            <button className="modalButton" onClick={() => setShowModal(false)}>
               Cerrar
             </button>
+          </div>
+        </div>
+      )}
+
+      {/* NUEVO: Modal de duplicados */}
+      {showDupModal && (
+        <div className="modalOverlay">
+          <div className="modalContent error">
+            <div className="modalIcon">⚠️</div>
+            <h2 className="modalTitle">No se pudo guardar</h2>
+
+            {/* Mensaje inteligente según el campo duplicado */}
+            {dupInfo.economical && dupInfo.badge ? (
+              <p className="modalMessage">
+                El <strong>número económico</strong> y la <strong>placa</strong> ya existen en el sistema.
+              </p>
+            ) : dupInfo.economical ? (
+              <p className="modalMessage">
+                El <strong>número económico</strong> ya existe en el sistema.
+              </p>
+            ) : dupInfo.badge ? (
+              <p className="modalMessage">
+                La <strong>placa</strong> ya existe en el sistema.
+              </p>
+            ) : (
+              <p className="modalMessage">
+                Ya existe un vehículo con los datos proporcionados.
+              </p>
+            )}
+            <button
+              className="modalButton"
+              onClick={() => setShowDupModal(false)}
+            >
+              Cerrar
+            </button>
+
           </div>
         </div>
       )}

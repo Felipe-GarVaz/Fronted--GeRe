@@ -19,7 +19,8 @@ h1 {
 
 .reportContainer .formGroup {
   margin-bottom: 20px;
-  position: relative; /* importante para autocompletado */
+  position: relative;
+  /* importante para autocompletado */
 }
 
 .reportContainer .formGroup label {
@@ -67,7 +68,8 @@ h1 {
 }
 
 .reportContainer .suggestionsList {
-  list-style: none; /* ❌ elimina las viñetas */
+  list-style: none;
+  /* ❌ elimina las viñetas */
   margin: 0;
   padding: 0;
   position: absolute;
@@ -81,7 +83,7 @@ h1 {
   max-height: 200px;
   overflow-y: auto;
   z-index: 10;
-  box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 }
 
 .reportContainer .suggestionItem {
@@ -179,11 +181,28 @@ h1 {
   margin-top: 4px;
 }
 
+.reportContainer .modalContent.error {
+  border-left: 6px solid #e53935;
+}
+
+.reportContainer .modalContent.success {
+  border-left: 6px solid #2e7d32;
+}
+
+.reportContainer .modalActions {
+  display: flex;
+  gap: 8px;
+  margin-top: 12px;
+  flex-wrap: wrap;
+}
+
+
 /* Animaciones */
 @keyframes fadeIn {
   from {
     background-color: rgba(0, 0, 0, 0);
   }
+
   to {
     background-color: rgba(0, 0, 0, 0.4);
   }
@@ -194,6 +213,7 @@ h1 {
     transform: scale(0.8);
     opacity: 0;
   }
+
   100% {
     transform: scale(1);
     opacity: 1;
@@ -206,7 +226,7 @@ h1 {
     padding: 15px;
   }
 
-  
+
   .reportContainer.reportForm {
     padding: 15px;
   }

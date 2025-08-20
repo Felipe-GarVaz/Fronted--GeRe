@@ -28,6 +28,11 @@ const VehicleReport = () => {
 
   const statusOptions = ['DISPONIBLE', 'OPERANDO CON FALLA', 'INDISPONIBLE'];
 
+  const mileageRef = useRef(null);
+  const [showErrModal, setShowErrModal] = useState(false);
+  const [errMsg, setErrMsg] = useState('');
+
+
   // ===== Obtener vehículos y tipos de falla al iniciar =====
   useEffect(() => {
     const fetchData = async () => {
@@ -145,6 +150,9 @@ const VehicleReport = () => {
     (status) => status !== toReadableStatus(formData.currentStatus)
   );
 
+  const setInvalidMsg = (e, msg) => e.target.setCustomValidity(msg);
+  const clearInvalidMsg = (e) => e.target.setCustomValidity('');
+
   // ===== Manejadores del formulario =====
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -229,11 +237,15 @@ const VehicleReport = () => {
       : 0;
 
     if (isNaN(newMileage)) {
-      setMileageError("Debe ingresar un número válido.");
+      setErrMsg("Debe ingresar un número válido de kilometraje.");
+      setShowErrModal(true);
       return;
     }
     if (newMileage < currentMileage) {
-      setMileageError("El nuevo kilometraje no puede ser menor al kilometraje actual.");
+      setErrMsg(
+        `El nuevo kilometraje (${newMileage.toLocaleString()}) no puede ser menor al actual (${currentMileage.toLocaleString()}).`
+      );
+      setShowErrModal(true);
       return;
     }
     setMileageError('');
@@ -291,6 +303,8 @@ const VehicleReport = () => {
             placeholder="Buscar por número económico o placa"
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
+            onInvalid={(e) => setInvalidMsg(e, 'Econmico y/o placa invalido')}
+            onInput={clearInvalidMsg}
             autoComplete="off"
           />
           {suggestions.length > 0 && (
@@ -324,6 +338,8 @@ const VehicleReport = () => {
                 name="newStatus"
                 value={formData.newStatus}
                 onChange={handleChange}
+                onInvalid={(e) => setInvalidMsg(e, 'Seleccione un estado')}
+                onInput={clearInvalidMsg}
                 required
               >
                 <option value="">Seleccione el nuevo estado</option>
@@ -344,6 +360,8 @@ const VehicleReport = () => {
                       name="locationUnavailable"
                       value={formData.locationUnavailable}
                       onChange={handleChange}
+                      onInvalid={(e) => setInvalidMsg(e, 'Seleccione la ubicacion')}
+                      onInput={clearInvalidMsg}
                       required
                     >
                       <option value="">Seleccione ubicación</option>
@@ -360,6 +378,8 @@ const VehicleReport = () => {
                     name="failType"
                     value={selectedFailTypeId}
                     onChange={handleFailTypeChange}
+                    onInvalid={(e) => setInvalidMsg(e, 'Seleccione la falla')}
+                    onInput={clearInvalidMsg}
                     required
                   >
                     <option value="">Seleccione la falla</option>
@@ -381,6 +401,8 @@ const VehicleReport = () => {
                       name="personalizedFailure"
                       value={formData.personalizedFailure}
                       onChange={handleChange}
+                      onInvalid={(e) => setInvalidMsg(e, 'Escriba la falla particular')}
+                      onInput={clearInvalidMsg}
                       placeholder="Describa la falla detectada"
                       required
                     />
@@ -394,14 +416,16 @@ const VehicleReport = () => {
               <label>Nuevo Kilometraje</label>
               {/* Usamos text + inputMode para poder limitar longitud */}
               <input
-                type="text"
+                ref={mileageRef}           // <-- NUEVO
+                type="number"
                 name="mileage"
                 value={formData.mileage}
                 onChange={handleChange}
-                placeholder="Ingrese el nuevo kilometraje"
-                inputMode="numeric"
-                pattern="\d{1,6}"
-                maxLength={6}
+                onInvalid={(e) => setInvalidMsg(e, 'El kilometraje debe ser igual o mayor al actual')}
+                onInput={clearInvalidMsg}
+                placeholder="Ej. 120000"
+                max="999999"
+                step="1"
                 required
               />
               {mileageError && <p className="error">{mileageError}</p>}
@@ -421,6 +445,20 @@ const VehicleReport = () => {
             <h2 className="modalTitle">¡Reporte Enviado!</h2>
             <p className="modalMessage">Tu reporte se ha enviado correctamente.</p>
             <button onClick={() => setShowModal(false)} className="modalButton">
+              Cerrar
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Modal de ERROR por kilometraje */}
+      {showErrModal && (
+        <div className="modalOverlay">
+          <div className="modalContent error">
+            <div className="modalIcon">⚠️</div>
+            <h2 className="modalTitle">No se pudo enviar</h2>
+            <p className="modalMessage">{errMsg}</p>
+            <button className="modalButton" onClick={() => setShowErrModal(false)}>
               Cerrar
             </button>
           </div>

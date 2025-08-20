@@ -169,7 +169,7 @@ const ReportTPSReaders = () => {
       <form onSubmit={handleSubmit} className="deviceReportForm">
         {/* Agencia */}
         <div className="formGroup">
-          <label>Agencia:</label>
+          <label>Centro de trabajo:</label>
           <select
             name="workCenter"
             value={formData.workCenterId}

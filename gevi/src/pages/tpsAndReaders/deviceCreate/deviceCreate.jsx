@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState, useRef } from 'react';
 import axios from 'axios';
 import './deviceCreate.css';
 
@@ -14,6 +14,10 @@ const AddDevice = () => {
   const [apiError, setApiError] = useState('');
   const [showModal, setShowModal] = useState(false);
   const [submitting, setSubmitting] = useState(false);
+
+  const [showDupModal, setShowDupModal] = useState(false);
+  const [dupMsg, setDupMsg] = useState('');
+  const serialRef = useRef(null);
 
   // Unicidad del número de serie
   const [checkingSerial, setCheckingSerial] = useState(false);
@@ -85,7 +89,7 @@ const AddDevice = () => {
         setCheckingSerial(true);
         const token = localStorage.getItem('token');
         const { data } = await axios.get(
-          `http://localhost:8080/api/devices/search?query=${encodeURIComponent(
+          `http://localhost:8080/api/device/search?query=${encodeURIComponent(
             normalizedSerial
           )}`,
           { headers: { Authorization: `Bearer ${token}` }, signal: controller.signal }
@@ -121,7 +125,8 @@ const AddDevice = () => {
 
     // Validación extra por unicidad
     if (serialTaken) {
-      setApiError('Ya existe un dispositivo con ese número de serie.');
+      setDupMsg('Ya existe un dispositivo con ese número de serie.');
+      setShowDupModal(true);
       return;
     }
 
@@ -155,15 +160,18 @@ const AddDevice = () => {
     } catch (err) {
       console.error('Error al registrar dispositivo:', err);
       const code = err?.response?.status;
-      const msg =
-        err?.response?.data?.message ||
-        (typeof err?.response?.data === 'string' ? err.response.data : null) ||
-        (code === 401 || code === 403
-          ? 'Sesión expirada o sin permisos.'
-          : code === 409
-          ? 'Ya existe un dispositivo con ese número de serie.'
-          : 'Ocurrió un error al registrar el dispositivo.');
-      setApiError(msg);
+      const body = err?.response?.data;
+      const rawMsg =
+        body?.message ||
+        (typeof body === 'string' ? body : null) ||
+        '';
+
+      if (code === 409) {
+        setDupMsg(rawMsg || 'Ya existe un dispositivo con ese número de serie.');
+        setShowDupModal(true);
+        return; // No pintes apiError genérico si ya mostramos el modal
+      }
+      setApiError(rawMsg);
     } finally {
       setSubmitting(false);
     }
@@ -173,22 +181,22 @@ const AddDevice = () => {
     <div className="createContainer">
       <h1>Registrar Nuevo Dispositivo</h1>
 
-      <form onSubmit={handleSubmit} className="reportForm" noValidate>
+      <form onSubmit={handleSubmit} className="reportForm">
         {/* Número de serie */}
         <div className="formGroup">
           <label htmlFor="serialNumber">Número de serie</label>
           <div className="inputWithHint">
             <input
+              ref={serialRef}
               id="serialNumber"
               type="text"
               name="serialNumber"
               value={formData.serialNumber}
               onChange={handleChange}
               onInvalid={(e) =>
-                setInvalidMsg(e, 'Use letras mayúsculas, números o guiones (3-50).')
+                setInvalidMsg(e, 'Ingrese números o letras')
               }
-              onInput={clearInvalidMsg}
-              placeholder="Ej. ABC-123456"
+              placeholder="Ej. AB123456"
               autoComplete="off"
               inputMode="text"
               minLength={3}
@@ -198,19 +206,7 @@ const AddDevice = () => {
               required
               aria-invalid={serialTaken ? 'true' : 'false'}
             />
-            <span className="hint" aria-live="polite">
-              {checkingSerial
-                ? 'Verificando…'
-                : serialTaken
-                ? 'Ya está en uso'
-                : formData.serialNumber
-                ? 'Disponible'
-                : ''}
-            </span>
           </div>
-          {serialTaken && (
-            <div className="error">Ya existe un dispositivo con ese número de serie.</div>
-          )}
         </div>
 
         {/* Tipo de dispositivo */}
@@ -225,7 +221,7 @@ const AddDevice = () => {
             onInput={clearInvalidMsg}
             required
           >
-            <option value="">Seleccione tipo</option>
+            <option value="">Seleccione tipo de dispositivo</option>
             <option value="TP_NEWLAND">TP NEWLAND</option>
             <option value="LECTOR_NEWLAND">LECTOR NEWLAND</option>
             <option value="TP_DOLPHIN_9900">TP DOLPHIN 9900</option>
@@ -235,7 +231,7 @@ const AddDevice = () => {
 
         {/* Centro de trabajo */}
         <div className="formGroup">
-          <label htmlFor="workCenterId">Agencia</label>
+          <label htmlFor="workCenterId">Centro de trabajo</label>
           <select
             id="workCenterId"
             name="workCenterId"
@@ -261,8 +257,8 @@ const AddDevice = () => {
         <button
           type="submit"
           className="submitBtn"
-          disabled={submitting || checkingSerial || serialTaken}
-          title={serialTaken ? 'El número de serie ya existe' : undefined}
+          disabled={submitting || checkingSerial}
+          title={checkingSerial ? 'Verificando número de serie...' : undefined}
         >
           {submitting ? 'Guardando...' : 'Guardar Dispositivo'}
         </button>
@@ -278,6 +274,24 @@ const AddDevice = () => {
             <button onClick={() => setShowModal(false)} className="modalButton">
               Cerrar
             </button>
+          </div>
+        </div>
+      )}
+
+      {/* Modal de ERROR por número de serie duplicado */}
+      {showDupModal && (
+        <div className="modalOverlay" role="dialog" aria-modal="true">
+          <div className="modalContent error">
+            <div className="modalIcon">⚠️</div>
+            <h2 className="modalTitle">No se pudo guardar</h2>
+            <p className="modalMessage">{dupMsg}</p>
+            <button
+              className="modalButton"
+              onClick={() => setShowDupModal(false)}
+            >
+              Cerrar
+            </button>
+
           </div>
         </div>
       )}

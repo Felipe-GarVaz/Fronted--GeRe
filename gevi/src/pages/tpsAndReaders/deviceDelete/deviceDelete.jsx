@@ -41,6 +41,8 @@ const DeleteDevice = () => {
         }
 
         const q = searchTerm.trim();
+
+        // 1) Reset rápido si vacío
         if (!q) {
             setSuggestions([]);
             setDevice(null);
@@ -49,21 +51,63 @@ const DeleteDevice = () => {
             return;
         }
 
+        // 2) Alineado con backend: mínimo 2 chars
+        if (q.length < 2) {
+            setSuggestions([]);
+            setDevice(null);
+            setActiveIndex(-1);
+            setErrorMsg("Buscando...");
+            return;
+        } else {
+            // limpia directamente, sin chequear errorMsg
+            setErrorMsg("");
+        }
+
         const controller = new AbortController();
         const timer = setTimeout(async () => {
             try {
                 setIsSearching(true);
                 const token = localStorage.getItem("token");
-                const res = await axios.get(
-                    `${API_BASE}/device/search?query=${encodeURIComponent(q)}`,
-                    { headers: { Authorization: `Bearer ${token}` }, signal: controller.signal }
-                );
 
-                const data = Array.isArray(res.data) ? res.data : [];
+                const res = await axios.get(`${API_BASE}/device/search`, {
+                    headers: { Authorization: `Bearer ${token}` },
+                    params: { query: q, page: 0, size: 10 }, // usa params, no string concatenation
+                    signal: controller.signal,
+                    validateStatus: (s) => [200, 204, 400].includes(s), // controlado
+                });
+
+                // 3) Manejo de estados típicos
+                if (res.status === 204) {
+                    setSuggestions([]);
+                    setDevice(null);
+                    setActiveIndex(-1);
+                    return;
+                }
+
+                if (res.status === 400) {
+                    // Suele venir por validación del backend (ej. tamaño)
+                    // Si quieres mostrar el mensaje exacto del backend:
+                    const msg = res?.data?.error || "Consulta inválida";
+                    setErrorMsg(typeof msg === "string" ? msg : "Consulta inválida");
+                    setSuggestions([]);
+                    setDevice(null);
+                    setActiveIndex(-1);
+                    return;
+                }
+
+                // 200 OK
+                const payload = res.data;
+                // Soporta tanto List<DTO> como Page<DTO>
+                const data = Array.isArray(payload)
+                    ? payload
+                    : Array.isArray(payload?.content)
+                        ? payload.content
+                        : [];
+
                 setSuggestions(data);
                 setActiveIndex(data.length ? 0 : -1);
 
-                // Autoselección si hay coincidencia exacta por serie
+                // 4) Autoselección si hay coincidencia exacta por serie
                 const lower = q.toLowerCase();
                 const exact = data.find((d) => d.serialNumber?.toLowerCase() === lower);
                 setDevice(exact || null);
@@ -76,13 +120,14 @@ const DeleteDevice = () => {
             } finally {
                 setIsSearching(false);
             }
-        }, 250);
+        }, 300); // 250-400ms va bien
 
         return () => {
             clearTimeout(timer);
             controller.abort();
         };
     }, [searchTerm]);
+
 
     const handleSelectSuggestion = (d) => {
         hasSelectedSuggestion.current = true;
@@ -110,7 +155,7 @@ const DeleteDevice = () => {
         try {
             const token = localStorage.getItem("token");
             await axios.delete(
-                `${API_BASE}/device/serial/${encodeURIComponent(device.serialNumber)}`,
+                `${API_BASE}/device/serialNumber/${encodeURIComponent(device.serialNumber)}`,
                 { headers: { Authorization: `Bearer ${token}` } }
             );
             setShowConfirm(false);
@@ -174,7 +219,7 @@ const DeleteDevice = () => {
             }
         });
     };
-    
+
     const deviceType = formatType(getTypeRaw(device));
     const workCenterName = getWorkCenterName(device);
 

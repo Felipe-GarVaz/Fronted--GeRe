@@ -12,7 +12,7 @@ const TpsReadersMenu = () => {
   const downloadExcelFile = () => {
     const token = localStorage.getItem("token");
 
-    fetch("http://localhost:8080/api/device/download", {
+    fetch("http://localhost:8080/api/device/export", {
       method: "GET",
       headers: {
         Authorization: `Bearer ${token}`,

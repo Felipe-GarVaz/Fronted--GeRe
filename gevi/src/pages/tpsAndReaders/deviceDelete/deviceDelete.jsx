@@ -56,12 +56,12 @@ const DeleteDevice = () => {
             setSuggestions([]);
             setDevice(null);
             setActiveIndex(-1);
-            setErrorMsg("Buscando...");
+            setErrorMsg("");
             return;
         } else {
-            // limpia directamente, sin chequear errorMsg
             setErrorMsg("");
         }
+
 
         const controller = new AbortController();
         const timer = setTimeout(async () => {
@@ -236,7 +236,8 @@ const DeleteDevice = () => {
                         placeholder="Escribe el número de serie"
                         value={searchTerm}
                         onChange={(e) => {
-                            setSearchTerm(e.target.value);
+                            const upper = e.target.value.toUpperCase();
+                            setSearchTerm(upper);
                             setErrorMsg("");
                         }}
                         onKeyDown={handleKeyDown}

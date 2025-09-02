@@ -201,7 +201,7 @@ const AddDevice = () => {
               inputMode="text"
               minLength={3}
               maxLength={50}
-              pattern="^[A-Z0-9-]{3,50}$"
+              pattern="^[A-Z0-9\-]{3,50}$"
               title="Use letras, números o guiones (3-50)"
               required
               aria-invalid={serialTaken ? 'true' : 'false'}

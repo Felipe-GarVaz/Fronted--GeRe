@@ -302,7 +302,7 @@ const VehicleReport = () => {
             type="text"
             placeholder="Buscar por número económico o placa"
             value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
+            onChange={(e) => setSearchTerm(e.target.value.toUpperCase())}
             onInvalid={(e) => setInvalidMsg(e, 'Econmico y/o placa invalido')}
             onInput={clearInvalidMsg}
             autoComplete="off"

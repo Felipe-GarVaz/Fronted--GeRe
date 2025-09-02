@@ -71,7 +71,11 @@ const Login = () => {
               type="text"
               placeholder="RPE"
               value={rpe}
-              onChange={(e) => setRpe(e.target.value)}
+              onChange={(e) => {
+                            const upper = e.target.value.toUpperCase();
+                            setRpe(upper);
+                            setErrorMessage("");
+                        }}
               required
             />
           </div>

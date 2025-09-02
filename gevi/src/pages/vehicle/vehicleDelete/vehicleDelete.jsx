@@ -176,7 +176,7 @@ const DeleteVehicle = () => {
                         placeholder="Buscar por número económico o placa"
                         value={searchTerm}
                         onChange={(e) => {
-                            setSearchTerm(e.target.value);
+                            setSearchTerm(e.target.value.toUpperCase());
                             setErrorMsg("");
                         }}
                         onKeyDown={handleKeyDown}

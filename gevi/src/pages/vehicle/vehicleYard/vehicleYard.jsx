@@ -163,7 +163,7 @@ const VehicleYard = () => {
               type="text"
               className="searchInput"
               placeholder="Buscar por número económico o placa"
-              value={searchTerm}
+              value={searchTerm.toUpperCase()}
               onChange={handleSearchChange}
               onKeyDown={handleKeyDown}
               onBlur={() => setTimeout(() => setSuggestions([]), 150)}

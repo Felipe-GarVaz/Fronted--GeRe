@@ -233,3 +233,105 @@
   margin: 0;
   font-size: 1.2rem;
 }
+
+/* Modal de éxito */
+.homeContainer .modalOverlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  animation: fadeIn 0.3s ease-in-out;
+}
+
+.homeContainer .modalContent {
+  background: #fff;
+  padding: 30px 40px;
+  border-radius: 16px;
+  text-align: center;
+  max-width: 400px;
+  width: 90%;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+  animation: scaleIn 0.4s ease;
+}
+
+.homeContainer .modalContent.success {
+  border-top: 8px solid #28a745;
+}
+
+.homeContainer .modalIcon {
+  font-size: 3rem;
+  color: #28a745;
+  margin-bottom: 15px;
+}
+
+.homeContainer .modalTitle {
+  font-size: 1.5rem;
+  color: #003366;
+  margin-bottom: 10px;
+}
+
+.homeContainer .modalMessage {
+  font-size: 1rem;
+  color: #555;
+  margin-bottom: 25px;
+}
+
+.homeContainer .modalButton {
+  padding: 10px 25px;
+  font-size: 14px;
+  background-color: #003366;
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.homeContainer .modalButton:hover {
+  background-color: #002244;
+}
+
+.homeContainer .modalContent.error {
+  border-left: 6px solid #e53935;
+}
+
+.homeContainer .modalContent.success {
+  border-left: 6px solid #2e7d32;
+}
+
+.homeContainer .modalActions {
+  display: flex;
+  gap: 8px;
+  margin-top: 12px;
+  flex-wrap: wrap;
+}
+
+
+/* Animaciones */
+@keyframes fadeIn {
+  from {
+    background-color: rgba(0, 0, 0, 0);
+  }
+
+  to {
+    background-color: rgba(0, 0, 0, 0.4);
+  }
+}
+
+@keyframes scaleIn {
+  0% {
+    transform: scale(0.8);
+    opacity: 0;
+  }
+
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}

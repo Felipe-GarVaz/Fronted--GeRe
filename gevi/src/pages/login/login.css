@@ -34,8 +34,9 @@ body {
 }
 
 .loginContainer .logo {
-  width: 100px;
-  margin: 10px 0 25px;
+  width: 150px;
+  height: 130px;
+  margin: 5px 0 5px;
 }
 
 .loginContainer .formGroup {

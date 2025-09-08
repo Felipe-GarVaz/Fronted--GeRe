@@ -166,7 +166,7 @@ const DamagedDevices = () => {
               type="text"
               className="searchInput"
               placeholder="Ej: OCCIDENTE"
-              value={searchTerm}
+              value={searchTerm.toUpperCase()}
               onChange={handleSearchChange}
               onKeyDown={handleKeyDown}
               onBlur={() => setTimeout(() => setSuggestions([]), 150)}

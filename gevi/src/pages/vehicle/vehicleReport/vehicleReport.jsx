@@ -269,7 +269,7 @@ const VehicleReport = () => {
     }
 
     try {
-      await axios.post("http://localhost:8080/api/reports", payload, {
+      await axios.post("http://localhost:8080/api/vehicle-report", payload, {
         headers: {
           Authorization: `Bearer ${token}`,
           "Content-Type": "application/json"

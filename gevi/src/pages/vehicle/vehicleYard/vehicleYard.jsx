@@ -54,7 +54,7 @@ const VehicleYard = () => {
     try {
       setFetchError('');
       const token = localStorage.getItem("token");
-      const { data } = await axios.get('http://localhost:8080/api/yard/vehicles', {
+      const { data } = await axios.get('http://localhost:8080/api/vehicle-report/yard', {
         headers: { Authorization: `Bearer ${token}` }
       });
       setVehicles(Array.isArray(data) ? data : []);

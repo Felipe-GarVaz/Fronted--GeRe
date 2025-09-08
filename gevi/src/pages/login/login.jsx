@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import "./login.css";
-import gestionImage from '../../assets/images/gestion.png';
+import gestionImage from '../../assets/images/GEVIDI.png';
 import axios from "axios";
 
 const Login = () => {
@@ -60,8 +60,8 @@ const Login = () => {
   return (
     <div className="loginContainer">
       <div className="loginCard">
-        <h1 className="title">GERE</h1>
-        <p className="subtitle">Gestión de Recursos</p>
+        <h1 className="title">GEVIDI</h1>
+        <p className="subtitle">Gestor de Vehículos y Dispositivos</p>
         <img src={gestionImage} alt="Logo Gestión" className="logo" />
 
         <form onSubmit={handleSubmit}>

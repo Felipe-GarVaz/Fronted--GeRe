@@ -5,6 +5,10 @@ import Login from "./pages/login/login";
 import Layout from './components/layout/layout';
 import Home from "./pages/home/home";
 
+import UserMenu from "./pages/user/userMenu/userMenu";
+import UserCreate from './pages/user/userCreate/userCreate';
+import UserDelete from './pages/user/userDelete/userDelete';
+
 import VehicleMenu from './pages/vehicle/vehicleMenu/vehicleMenu';
 import VehicleCreate from './pages/vehicle/vehicleCreate/vehicleCreate';
 import VehicleDelete from './pages/vehicle/vehicleDelete/vehicleDelete';
@@ -37,6 +41,9 @@ function App() {
 
         <Route path="/vehiculos-menu"
           element={<ProtectedRoute><Layout><VehicleMenu /> </Layout></ProtectedRoute>} />
+
+        <Route path="/usuarios-menu"
+          element={<ProtectedRoute roles={['ADMIN']}><Layout><UserMenu /> </Layout></ProtectedRoute>} />
 
         <Route path="/agregar-vehiculo"
           element={<ProtectedRoute roles={['ADMIN']}><Layout><VehicleCreate /> </Layout></ProtectedRoute>} />
@@ -73,6 +80,12 @@ function App() {
 
         <Route path="/tps-lectores-defectuosos"
           element={<ProtectedRoute><Layout><DeviceDamaged /> </Layout></ProtectedRoute>} />
+
+        <Route path="/agregar-usuario"
+          element={<ProtectedRoute roles={['ADMIN']}><Layout><UserCreate /> </Layout></ProtectedRoute>} />
+
+        <Route path="/eliminar-usuario"
+          element={<ProtectedRoute roles={['ADMIN']}><Layout><UserDelete /> </Layout></ProtectedRoute>} />
 
         <Route path="/403" element={<Forbidden />} />
 

@@ -31,6 +31,8 @@ const DeleteUser = () => {
     const [isLoading, setIsLoading] = useState(false);
     const [showConfirm, setShowConfirm] = useState(false);
     const [errorMsg, setErrorMsg] = useState("");
+    const [showAlert, setShowAlert] = useState(false); // nuevo: modal de alerta
+    const [alertMsg, setAlertMsg] = useState(""); // mensaje para modal de alerta
     const hasSelectedSuggestion = useRef(false);
     const listboxRef = useRef(null);
 
@@ -125,8 +127,7 @@ const DeleteUser = () => {
 
     const handleSelectSuggestion = (u) => {
         hasSelectedSuggestion.current = true;
-        const label = getFullName(u);
-        setSearchTerm(label ? `${u.rpe} - ${label}` : u.rpe);
+        setSearchTerm(u.rpe || "");
         setUser(u);
         setSuggestions([]);
         setActiveIndex(-1);
@@ -140,6 +141,8 @@ const DeleteUser = () => {
         setActiveIndex(-1);
         setErrorMsg("");
         setShowConfirm(false);
+        setShowAlert(false);
+        setAlertMsg("");
     };
 
     const handleDelete = async () => {
@@ -174,12 +177,29 @@ const DeleteUser = () => {
         }
     };
 
+    // Cuando el usuario pulsa el botón 'Eliminar' o presiona Enter
     const handleSubmitOrEnter = (e) => {
-        e.preventDefault();
+        // soporta llamadas desde onClick (sin evento) o desde form submit (con evento)
+        if (e && typeof e.preventDefault === "function") e.preventDefault();
+
+        // Si no hay usuario seleccionado -> mostrar modal de alerta con mensaje específico
         if (!user) {
-            setErrorMsg("Selecciona un usuario de la lista o escribe un RPE válido.");
+            const q = searchTerm.trim();
+            if (!q) {
+                setAlertMsg("No has escrito ningún RPE. Por favor escribe un RPE y selecciónalo de la lista.");
+            } else {
+                setAlertMsg(`No se encontró un usuario con RPE "${q}". Selecciona una sugerencia válida.`);
+            }
+            setShowAlert(true);
             return;
         }
+        // Si el usuario ya está marcado como eliminado, no permitir continuar
+        if (user.__deleted) {
+            setAlertMsg("El usuario ya fue eliminado.");
+            setShowAlert(true);
+            return;
+        }
+        // Mostrar modal de confirmación para eliminar
         setShowConfirm(true);
     };
 
@@ -239,7 +259,6 @@ const DeleteUser = () => {
                         onKeyDown={handleKeyDown}
                         onBlur={() => setTimeout(() => setSuggestions([]), 120)}
                         autoComplete="off"
-                        required
                     />
 
                     {suggestions.length > 0 && (
@@ -285,15 +304,41 @@ const DeleteUser = () => {
                     </div>
                 )}
 
-                {/* Botón eliminar */}
+                {/* Botón eliminar (ahora tipo button para permitir click incluso sin usuario) */}
                 <button
-                    type="submit"
+                    type="button"
                     className="submitBtn"
-                    disabled={!user || user.__deleted || isLoading}
+                    onClick={handleSubmitOrEnter}
+                    disabled={user?.__deleted || isLoading}
                 >
                     {isLoading ? "Eliminando..." : "Eliminar usuario"}
                 </button>
             </form>
+
+            {/* Modal de alerta (nuevo) */}
+            {showAlert && (
+                <div
+                    className="modalOverlay"
+                    role="alertdialog"
+                    aria-modal="true"
+                    aria-labelledby="alert-title"
+                >
+                    <div className="modalContent">
+                        <div className="modalIcon">⚠️</div>
+                        <h2 className="modalTitle" id="alert-title">Atención</h2>
+                        <p className="modalMessage">{alertMsg}</p>
+                        <div style={{ display: "flex", gap: 12, justifyContent: "center" }}>
+                            <button
+                                className="modalButton"
+                                onClick={() => setShowAlert(false)}
+                                autoFocus
+                            >
+                                Cerrar
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
 
             {/* Modal de confirmación */}
             {showConfirm && user && !user.__deleted && (

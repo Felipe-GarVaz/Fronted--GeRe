@@ -224,11 +224,10 @@ const AddVehicle = () => {
             name="property"
             value={formData.property}
             onChange={handleChange}
-            onInvalid={(e) => setInvalidMsg(e, 'Seleccione una propiedad')}
             onInput={clearInvalidMsg}
             required
           >
-            <option value="">Seleccione propiedad</option>
+            <option value="">Seleccione una propiedad</option>
             <option value="PROPIO">PROPIO</option>
             <option value="ARRENDADO">ARRENDADO</option>
           </select>
@@ -309,7 +308,6 @@ const AddVehicle = () => {
             name="workCenterId"
             value={formData.workCenterId}
             onChange={handleChange}
-            onInvalid={(e) => setInvalidMsg(e, 'Seleccione un centro de trabajo')}
             onInput={clearInvalidMsg}
             required
           >
@@ -329,11 +327,10 @@ const AddVehicle = () => {
             name="processId"
             value={formData.processId}
             onChange={handleChange}
-            onInvalid={(e) => setInvalidMsg(e, 'Seleccione un proceso')}
             onInput={clearInvalidMsg}
             required
           >
-            <option value="">Seleccione proceso</option>
+            <option value="">Seleccione un proceso</option>
             {processes.map((pr) => (
               <option key={pr.id} value={pr.id}>
                 {pr.name || pr.nombre}

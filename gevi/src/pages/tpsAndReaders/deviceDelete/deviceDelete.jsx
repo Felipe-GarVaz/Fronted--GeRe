@@ -31,6 +31,8 @@ const DeleteDevice = () => {
     const [showConfirm, setShowConfirm] = useState(false);
     const [errorMsg, setErrorMsg] = useState("");
     const hasSelectedSuggestion = useRef(false);
+    const [showAlert, setShowAlert] = useState(false);
+    const [alertMsg, setAlertMsg] = useState("");
     const listboxRef = useRef(null);
 
     // ===== Buscar sugerencias por NÚMERO DE SERIE (debounce + cancelación)
@@ -179,11 +181,25 @@ const DeleteDevice = () => {
     };
 
     const handleSubmitOrEnter = (e) => {
-        e.preventDefault();
+        if (e && typeof e.preventDefault === "function") e.preventDefault();
+
         if (!device) {
-            setErrorMsg("Selecciona un dispositivo de la lista o escribe un número de serie válido.");
+            const q = searchTerm.trim();
+            if (!q) {
+                setAlertMsg("No has escrito ningún número de serie. Por favor escribe un número de serie válido.");
+            } else {
+                setAlertMsg(`No se encontró un dispositivo con serie "${q}". Selecciona una sugerencia válida.`);
+            }
+            setShowAlert(true);
             return;
         }
+
+        if (device.__deleted) {
+            setAlertMsg("El dispositivo ya fue eliminado.");
+            setShowAlert(true);
+            return;
+        }
+
         setShowConfirm(true);
     };
 
@@ -292,13 +308,38 @@ const DeleteDevice = () => {
 
                 {/* Botón eliminar */}
                 <button
-                    type="submit"
+                    type="button"
                     className="submitBtn"
-                    disabled={!device || device.__deleted || isLoading}
+                    onClick={handleSubmitOrEnter}
+                    disabled={isLoading}
                 >
                     {isLoading ? "Eliminando..." : "Eliminar dispositivo"}
                 </button>
             </form>
+
+            {showAlert && (
+                <div
+                    className="modalOverlay"
+                    role="alertdialog"
+                    aria-modal="true"
+                    aria-labelledby="alert-title"
+                >
+                    <div className="modalContent">
+                        <div className="modalIcon">⚠️</div>
+                        <h2 className="modalTitle" id="alert-title">Atención</h2>
+                        <p className="modalMessage">{alertMsg}</p>
+                        <div style={{ display: "flex", gap: 12, justifyContent: "center" }}>
+                            <button
+                                className="modalButton"
+                                onClick={() => setShowAlert(false)}
+                                autoFocus
+                            >
+                                Cerrar
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
 
             {/* Modal de confirmación */}
             {showConfirm && device && !device.__deleted && (

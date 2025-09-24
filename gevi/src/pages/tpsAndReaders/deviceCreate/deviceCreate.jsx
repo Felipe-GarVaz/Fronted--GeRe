@@ -192,17 +192,22 @@ const AddDevice = () => {
               type="text"
               name="serialNumber"
               value={formData.serialNumber}
-              onChange={handleChange}
+              onChange={(e) =>
+                setFormData({
+                  ...formData,
+                  serialNumber: e.target.value.toUpperCase(),
+                })
+              }
+              onBlur={(e) =>
+                setFormData({ ...formData, serialNumber: e.target.value.trim() })
+              }
               onInvalid={(e) =>
-                setInvalidMsg(e, 'Ingrese números o letras')
+                setInvalidMsg(e, 'Ingrese solo números y letras')
               }
               placeholder="Ej. AB123456"
               autoComplete="off"
-              inputMode="text"
-              minLength={3}
-              maxLength={50}
-              pattern="^[A-Z0-9\-]{3,50}$"
-              title="Use letras, números o guiones (3-50)"
+              maxLength={20}
+              pattern="[A-Z0-9]{3,}"
               required
               aria-invalid={serialTaken ? 'true' : 'false'}
             />

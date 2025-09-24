@@ -105,13 +105,12 @@ const AddUser = () => {
             name="rpe"
             value={rpe}
             onChange={(e) => setRpe(e.target.value.toUpperCase())}
-            onInvalid={(e) => setInvalidMsg(e, "El RPE debe tener de 3 a 20 caracteres (A-Z, 0-9 y guión)")}
+            onInvalid={(e) => setInvalidMsg(e, "El RPE debe tener de 5 caracteres (A-Z,0-9)")}
             onInput={clearInvalidMsg}
-            placeholder="Ej. ABC123"
+            placeholder="Ej. 9FKGR"
             autoComplete="off"
-            maxLength={20}
-            pattern="^[A-Z0-9-]{3,20}$"
-            title="3-20 caracteres en mayúsculas (A-Z, 0-9 y -)"
+            maxLength={5}
+            pattern="^[A-Z0-9]{5}$"
             required
           />
         </div>
@@ -124,11 +123,12 @@ const AddUser = () => {
             name="name"
             value={name}
             onChange={(e) => setName(e.target.value.toUpperCase())}
-            onInvalid={(e) => setInvalidMsg(e, "Ingrese el nombre")}
+            onInvalid={(e) => setInvalidMsg(e, "Ingrese nombre(s) (solo letras A-Z, sin espacios al inicio o final)")}
             onInput={clearInvalidMsg}
             placeholder="Ej. FELIPE"
             autoComplete="off"
-            maxLength={100}
+            maxLength={50}
+            pattern="^(?! )[A-ZÁÉÍÓÚÑ ]{3,}(?<! )$"
             required
           />
         </div>
@@ -141,11 +141,12 @@ const AddUser = () => {
             name="lastName"
             value={lastName}
             onChange={(e) => setLastName(e.target.value.toUpperCase())}
-            onInvalid={(e) => setInvalidMsg(e, "Ingrese los apellidos")}
+            onInvalid={(e) => setInvalidMsg(e, "Ingrese los apellidos (solo letras A-Z, sin espacios al inicio o final)")}
             onInput={clearInvalidMsg}
-            placeholder="Ej. GARCÍA VÁZQUEZ"
+            placeholder="Ej. GARCIA VAZQUEZ"
             autoComplete="off"
-            maxLength={100}
+            maxLength={50}
+            pattern="^(?! )[A-ZÁÉÍÓÚÑ ]{3,}(?<! )$"
             required
           />
         </div>

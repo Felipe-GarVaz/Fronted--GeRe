@@ -176,7 +176,7 @@ const ReportTPSReaders = () => {
             onChange={handleChange}
             required
           >
-            <option value="">Seleccione una agencia</option>
+            <option value="">Seleccione un centro de trabajo</option>
             {workCenters.map(center => (
               <option key={center.id} value={center.id}>
                 {center.name || center.nombre}
@@ -194,7 +194,7 @@ const ReportTPSReaders = () => {
             onChange={handleChange}
             required
           >
-            <option value="">Seleccione tipo</option>
+            <option value="">Seleccione tipo de dispositivo</option>
             {deviceTypes.map((type) => (
               <option key={type.value} value={type.value}>{type.label}</option>
             ))}

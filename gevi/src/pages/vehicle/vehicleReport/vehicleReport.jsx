@@ -145,10 +145,15 @@ const VehicleReport = () => {
     setMileageError('');
   };
 
-  // ===== Estados diferentes al actual =====
-  const filteredStatusOptions = statusOptions.filter(
-    (status) => status !== toReadableStatus(formData.currentStatus)
-  );
+// ===== Estados diferentes al actual, excepto si está "INDISPONIBLE" =====
+const filteredStatusOptions = statusOptions.filter((status) => {
+    const current = toReadableStatus(formData.currentStatus);
+    if (current === "INDISPONIBLE") {
+        // Si el actual es INDISPONIBLE, no lo filtramos
+        return true;
+    }
+    return status !== current;
+});
 
   const setInvalidMsg = (e, msg) => e.target.setCustomValidity(msg);
   const clearInvalidMsg = (e) => e.target.setCustomValidity('');
@@ -338,7 +343,6 @@ const VehicleReport = () => {
                 name="newStatus"
                 value={formData.newStatus}
                 onChange={handleChange}
-                onInvalid={(e) => setInvalidMsg(e, 'Seleccione un estado')}
                 onInput={clearInvalidMsg}
                 required
               >

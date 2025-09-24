@@ -8,16 +8,18 @@ const API_BASE = "http://localhost:8080/api";
 const DeleteVehicle = () => {
     const [searchTerm, setSearchTerm] = useState("");
     const [suggestions, setSuggestions] = useState([]);
-    const [activeIndex, setActiveIndex] = useState(-1); // navegación con teclado
+    const [activeIndex, setActiveIndex] = useState(-1);
     const [vehicle, setVehicle] = useState(null);
     const [isSearching, setIsSearching] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
     const [showConfirm, setShowConfirm] = useState(false);
     const [errorMsg, setErrorMsg] = useState("");
+    const [showAlert, setShowAlert] = useState(false);
+    const [alertMsg, setAlertMsg] = useState("");
     const hasSelectedSuggestion = useRef(false);
     const listboxRef = useRef(null);
 
-    // ===== Buscar sugerencias por económico O placa (con debounce + cancelación)
+    // ===== Buscar sugerencias
     useEffect(() => {
         if (hasSelectedSuggestion.current) {
             hasSelectedSuggestion.current = false;
@@ -47,12 +49,9 @@ const DeleteVehicle = () => {
                 setSuggestions(data);
                 setActiveIndex(data.length ? 0 : -1);
 
-                // Autoselección si hay coincidencia exacta por económico o placa
                 const lower = q.toLowerCase();
                 const exact = data.find(
-                    (v) =>
-                        v.economical?.toLowerCase() === lower ||
-                        v.badge?.toLowerCase() === lower
+                    (v) => v.economical?.toLowerCase() === lower || v.badge?.toLowerCase() === lower
                 );
                 setVehicle(exact || null);
             } catch (err) {
@@ -88,6 +87,7 @@ const DeleteVehicle = () => {
         setActiveIndex(-1);
         setErrorMsg("");
         setShowConfirm(false);
+        setShowAlert(false);
     };
 
     const handleDelete = async () => {
@@ -101,7 +101,6 @@ const DeleteVehicle = () => {
                 { headers: { Authorization: `Bearer ${token}` } }
             );
             setShowConfirm(false);
-            // Flag para modal de éxito
             setVehicle((prev) => ({ ...prev, __deleted: true }));
         } catch (err) {
             console.error("No se pudo eliminar:", err);
@@ -121,11 +120,25 @@ const DeleteVehicle = () => {
     };
 
     const handleSubmitOrEnter = (e) => {
-        e.preventDefault();
+        e?.preventDefault();
+
         if (!vehicle) {
-            setErrorMsg("Selecciona un vehículo de la lista o escribe un valor válido.");
+            const q = searchTerm.trim();
+            if (!q) {
+                setAlertMsg("No has escrito ningún número económico o placa. Por favor escribe un valor válido.");
+            } else {
+                setAlertMsg(`No se encontró un vehículo con "${q}". Selecciona una sugerencia válida.`);
+            }
+            setShowAlert(true);
             return;
         }
+
+        if (vehicle.__deleted) {
+            setAlertMsg("El vehículo ya fue eliminado.");
+            setShowAlert(true);
+            return;
+        }
+
         setShowConfirm(true);
     };
 
@@ -141,7 +154,6 @@ const DeleteVehicle = () => {
             setActiveIndex((idx) => (idx - 1 + suggestions.length) % suggestions.length);
             scrollActiveIntoView();
         } else if (e.key === "Enter") {
-            // Si hay sugerencias, seleccionar la activa
             if (activeIndex >= 0) {
                 e.preventDefault();
                 handleSelectSuggestion(suggestions[activeIndex]);
@@ -168,7 +180,7 @@ const DeleteVehicle = () => {
             <h1>Eliminar Vehículo</h1>
 
             <form className="reportForm" onSubmit={handleSubmitOrEnter}>
-                {/* Input combinado: económico o placa */}
+                {/* Input combinado */}
                 <div className="formGroup searchContainer">
                     <label>Buscar vehículo</label>
                     <input
@@ -202,7 +214,6 @@ const DeleteVehicle = () => {
                                         aria-selected={isActive}
                                         data-active={isActive ? "true" : "false"}
                                         className={`suggestionItem ${isActive ? "active" : ""}`}
-                                        // onMouseDown evita que el blur del input cancele el click
                                         onMouseDown={() => handleSelectSuggestion(v)}
                                     >
                                         {v.economical} - {v.badge}
@@ -233,13 +244,39 @@ const DeleteVehicle = () => {
 
                 {/* Botón eliminar */}
                 <button
-                    type="submit"
+                    type="button"
                     className="submitBtn"
-                    disabled={!vehicle || vehicle.__deleted || isLoading}
+                    onClick={handleSubmitOrEnter}
+                    disabled={isLoading}
                 >
                     {isLoading ? "Eliminando..." : "Eliminar vehículo"}
                 </button>
             </form>
+
+            {/* Modal de alerta */}
+            {showAlert && (
+                <div
+                    className="modalOverlay"
+                    role="alertdialog"
+                    aria-modal="true"
+                    aria-labelledby="alert-title"
+                >
+                    <div className="modalContent">
+                        <div className="modalIcon">⚠️</div>
+                        <h2 className="modalTitle" id="alert-title">Atención</h2>
+                        <p className="modalMessage">{alertMsg}</p>
+                        <div style={{ display: "flex", gap: 12, justifyContent: "center" }}>
+                            <button
+                                className="modalButton"
+                                onClick={() => setShowAlert(false)}
+                                autoFocus
+                            >
+                                Cerrar
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
 
             {/* Modal de confirmación */}
             {showConfirm && vehicle && !vehicle.__deleted && (
@@ -248,8 +285,8 @@ const DeleteVehicle = () => {
                         <div className="modalIcon">🗑️</div>
                         <h2 className="modalTitle" id="confirm-title">Confirmar eliminación</h2>
                         <p className="modalMessage">
-                            ¿Seguro que deseas eliminar el vehículo <strong>{vehicle.economical}</strong>
-                            ? Esta acción no se puede deshacer.
+                            ¿Seguro que deseas eliminar el vehículo <strong>{vehicle.economical}</strong>?
+                            Esta acción no se puede deshacer.
                         </p>
                         <div style={{ display: "flex", gap: 12, justifyContent: "center" }}>
                             <button className="modalButton" onClick={() => setShowConfirm(false)}>

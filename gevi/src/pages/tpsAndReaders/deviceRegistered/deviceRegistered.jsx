@@ -39,29 +39,36 @@ const RegisteredDevice = () => {
     tpDolphin9900Damaged: acc.tpDolphin9900Damaged + device.tpDolphin9900Damaged,
     readerDolphin9900: acc.readerDolphin9900 + device.readerDolphin9900,
     readerDolphin9900Damaged: acc.readerDolphin9900Damaged + device.readerDolphin9900Damaged,
+    bluebird: acc.bluebird + device.bluebird,
+    bluebirdDamaged: acc.bluebirdDamaged + device.bluebirdDamaged,
+    phoneOthers: acc.phoneOthers + device.phoneOthers,
+    phoneOthersDamaged: acc.phoneOthersDamaged + device.phoneOthersDamaged,
   }), {
     tpNewland: 0, tpNewlandDamaged: 0,
     readerNewland: 0, readerNewlandDamaged: 0,
     tpDolphin9900: 0, tpDolphin9900Damaged: 0,
     readerDolphin9900: 0, readerDolphin9900Damaged: 0,
+    bluebird: 0, bluebirdDamaged: 0,
+    phoneOthers: 0, phoneOthersDamaged: 0,
   });
 
   const totalDevices =
-    totals.tpNewland + totals.readerNewland + totals.tpDolphin9900 + totals.readerDolphin9900;
+    totals.tpNewland + totals.readerNewland + totals.tpDolphin9900 + totals.readerDolphin9900 +
+    totals.bluebird + totals.phoneOthers;
 
   const totalDamaged =
-    totals.tpNewlandDamaged + totals.readerNewlandDamaged +
-    totals.tpDolphin9900Damaged + totals.readerDolphin9900Damaged;
+    totals.tpNewlandDamaged + totals.readerNewlandDamaged + totals.tpDolphin9900Damaged + totals.readerDolphin9900Damaged +
+    totals.bluebirdDamaged + totals.phoneOthersDamaged;
 
   // ===== Renderizado =====
   return (
     <div className="deviceListContainer">
-      <h1>TPS y Lectores Registrados</h1>
+      <h1>TPs y lectores registrados</h1>
 
       {/* Filtro por agencia */}
       <div className="filtersSection">
         <div className="searchGroup">
-          <label>Buscar por Agencia:</label>
+          <label>Buscar por Centro de trabajo:</label>
           <input
             type="text"
             placeholder="Ej: Teziutlan"
@@ -82,12 +89,20 @@ const RegisteredDevice = () => {
           <span className="damaged">Dañados: {totals.readerNewlandDamaged}</span>
         </div>
         <div className="counterBox TPDolfin">
-          <strong>TP Dolfin 9900:</strong> {totals.tpDolphin9900}<br />
+          <strong>TP Dolphin 9900:</strong> {totals.tpDolphin9900}<br />
           <span className="damaged">Dañados: {totals.tpDolphin9900Damaged}</span>
         </div>
         <div className="counterBox LectorDolfin">
-          <strong>Lector Dolfin 9900:</strong> {totals.readerDolphin9900}<br />
+          <strong>Lector Dolphin 9900:</strong> {totals.readerDolphin9900}<br />
           <span className="damaged">Dañados: {totals.readerDolphin9900Damaged}</span>
+        </div>
+        <div className="counterBox Bluebird">
+          <strong>Bluebird:</strong> {totals.bluebird}<br />
+          <span className="damaged">Dañados: {totals.bluebirdDamaged}</span>
+        </div>
+        <div className="counterBox PhoneOthers">
+          <strong>Celulares/Otros:</strong> {totals.phoneOthers}<br />
+          <span className="damaged">Dañados: {totals.phoneOthersDamaged}</span>
         </div>
         <div className="counterBox TotalDamaged">
           <strong>Total Dañados:</strong> {totalDamaged}
@@ -102,11 +117,13 @@ const RegisteredDevice = () => {
         <table>
           <thead>
             <tr>
-              <th>Agencia</th>
+              <th>Centro de trabajo</th>
               <th>TP Newland</th>
               <th>Lector Newland</th>
-              <th>TP Dolfin 9900</th>
-              <th>Lector Dolfin 9900</th>
+              <th>TP Dolphin 9900</th>
+              <th>Lector Dolphin 9900</th>
+              <th>Bluebird</th>
+              <th>Celular/Otros</th>
             </tr>
           </thead>
           <tbody>
@@ -118,6 +135,8 @@ const RegisteredDevice = () => {
                   <td>{device.readerNewland}</td>
                   <td>{device.tpDolphin9900}</td>
                   <td>{device.readerDolphin9900}</td>
+                  <td>{device.bluebird}</td>
+                  <td>{device.phoneOthers}</td>
                 </tr>
               ))
             ) : (

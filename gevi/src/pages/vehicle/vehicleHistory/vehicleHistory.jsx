@@ -149,7 +149,7 @@ const VehicleHistory = () => {
   // ===== Renderizado =====
   return (
     <div className="reportHistoryContainer">
-      <h1>Historial de Reportes de Vehículos</h1>
+      <h1>Historial de reportes de vehículos</h1>
 
       {/* Sección de búsqueda */}
       <div className="searchSection">

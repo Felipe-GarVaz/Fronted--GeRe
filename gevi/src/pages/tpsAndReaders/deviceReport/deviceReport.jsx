@@ -26,7 +26,9 @@ const ReportTPSReaders = () => {
     { label: 'TP NEWLAND', value: 'TP_NEWLAND' },
     { label: 'LECTOR NEWLAND', value: 'LECTOR_NEWLAND' },
     { label: 'TP DOLPHIN 9900', value: 'TP_DOLPHIN_9900' },
-    { label: 'LECTOR DOLPHIN 9900', value: 'LECTOR_DOLPHIN_9900' }
+    { label: 'LECTOR DOLPHIN 9900', value: 'LECTOR_DOLPHIN_9900' },
+    { label: 'BLUEBIRD', value: 'BLUEBIRD' },
+     { label: 'CELULAR/OTROS', value: 'CELULAR_OTROS' }
   ];
 
   // ===== Carga inicial de agencias y fallas =====
@@ -164,7 +166,7 @@ const ReportTPSReaders = () => {
 
   return (
     <div className="deviceReportContainer">
-      <h1>Reportar Daño de TPS o Lector</h1>
+      <h1>Reportar estado de dispositivo</h1>
 
       <form onSubmit={handleSubmit} className="deviceReportForm">
         {/* Agencia */}
@@ -282,7 +284,7 @@ const ReportTPSReaders = () => {
         {apiError && <div className="error" style={{ marginTop: 8 }}>{apiError}</div>}
 
         <button type="submit" className="submitBtn" disabled={submitting}>
-          {submitting ? 'Enviando…' : 'Enviar Reporte'}
+          {submitting ? 'Enviando…' : 'Enviar reporte'}
         </button>
       </form>
 

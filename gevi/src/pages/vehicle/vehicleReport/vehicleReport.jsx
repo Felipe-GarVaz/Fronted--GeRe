@@ -298,7 +298,7 @@ const filteredStatusOptions = statusOptions.filter((status) => {
 
   return (
     <div className="reportContainer">
-      <h1 className="formTitle">Reportar Estado de Vehículo</h1>
+      <h1 className="formTitle">Reportar estado de vehículo</h1>
       <form onSubmit={handleSubmit} className="reportForm">
         {/* Búsqueda del vehículo */}
         <div className="formGroup searchContainer">
@@ -332,13 +332,13 @@ const filteredStatusOptions = statusOptions.filter((status) => {
             <div className="vehicleInfoBox">
               <p><strong>Económico:</strong> {formData.economical}</p>
               <p><strong>Placa:</strong> {formData.badge}</p>
-              <p><strong>Estado Actual:</strong> {toReadableStatus(formData.currentStatus)}</p>
-              <p><strong>Kilometraje Actual:</strong> {currentMileageDisplay} km</p>
+              <p><strong>Estado actual:</strong> {toReadableStatus(formData.currentStatus)}</p>
+              <p><strong>Kilometraje actual:</strong> {currentMileageDisplay} km</p>
             </div>
 
             {/* Selección de nuevo estado */}
             <div className="formGroup">
-              <label>Nuevo Estado</label>
+              <label>Nuevo estado</label>
               <select
                 name="newStatus"
                 value={formData.newStatus}
@@ -359,7 +359,7 @@ const filteredStatusOptions = statusOptions.filter((status) => {
                 {/* Ubicación si es indisponible */}
                 {formData.newStatus === 'INDISPONIBLE' && (
                   <div className="formGroup">
-                    <label>Ubicación del Vehículo</label>
+                    <label>Ubicación del vehículo</label>
                     <select
                       name="locationUnavailable"
                       value={formData.locationUnavailable}
@@ -377,7 +377,7 @@ const filteredStatusOptions = statusOptions.filter((status) => {
 
                 {/* Tipo de falla */}
                 <div className="formGroup">
-                  <label>Falla Detectada</label>
+                  <label>Falla detectada</label>
                   <select
                     name="failType"
                     value={selectedFailTypeId}
@@ -417,7 +417,7 @@ const filteredStatusOptions = statusOptions.filter((status) => {
 
             {/* Kilometraje nuevo */}
             <div className="formGroup">
-              <label>Nuevo Kilometraje</label>
+              <label>Nuevo kilometraje</label>
               {/* Usamos text + inputMode para poder limitar longitud */}
               <input
                 ref={mileageRef}           // <-- NUEVO
@@ -436,7 +436,7 @@ const filteredStatusOptions = statusOptions.filter((status) => {
             </div>
 
             {/* Botón de envío */}
-            <button type="submit" className="submitBtn">Enviar Reporte</button>
+            <button type="submit" className="submitBtn">Enviar reporte</button>
           </>
         )}
       </form>

@@ -241,7 +241,7 @@ const DeleteDevice = () => {
 
     return (
         <div className="deleteContainer">
-            <h1>Eliminar Dispositivo</h1>
+            <h1>Eliminar dispositivo</h1>
 
             <form className="reportForm" onSubmit={handleSubmitOrEnter}>
                 {/* Input: número de serie */}

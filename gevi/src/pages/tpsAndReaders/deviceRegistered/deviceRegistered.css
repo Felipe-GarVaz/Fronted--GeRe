@@ -87,6 +87,14 @@ h1 {
   background-color: #17a2b8;
 }
 
+.deviceListContainer .counterBox.Bluebird {
+  background-color: #17a2b8;
+}
+
+.deviceListContainer .counterBox.PhoneOthers {
+  background-color: #17a2b8;
+}
+
 .deviceListContainer .counterBox .damaged {
   font-size: 0.9rem;
   color: #ffc107;

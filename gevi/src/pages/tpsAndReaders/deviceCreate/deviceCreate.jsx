@@ -179,7 +179,7 @@ const AddDevice = () => {
 
   return (
     <div className="createContainer">
-      <h1>Registrar Nuevo Dispositivo</h1>
+      <h1>Registrar nuevo dispositivo</h1>
 
       <form onSubmit={handleSubmit} className="reportForm">
         {/* Número de serie */}
@@ -231,6 +231,8 @@ const AddDevice = () => {
             <option value="LECTOR_NEWLAND">LECTOR NEWLAND</option>
             <option value="TP_DOLPHIN_9900">TP DOLPHIN 9900</option>
             <option value="LECTOR_DOLPHIN_9900">LECTOR DOLPHIN 9900</option>
+            <option value="BLUEBIRD">BLUEBIRD</option>
+            <option value="CELULAR_OTROS">CELULAR/OTROS</option>
           </select>
         </div>
 
@@ -265,7 +267,7 @@ const AddDevice = () => {
           disabled={submitting || checkingSerial}
           title={checkingSerial ? 'Verificando número de serie...' : undefined}
         >
-          {submitting ? 'Guardando...' : 'Guardar Dispositivo'}
+          {submitting ? 'Guardando...' : 'Guardar dispositivo'}
         </button>
       </form>
 

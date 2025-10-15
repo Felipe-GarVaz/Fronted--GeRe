@@ -84,12 +84,12 @@ const RegisteredVehicles = () => {
     // ===== Renderizado =====
     return (
         <div className="vehicleListContainer">
-            <h1>Vehículos Registrados</h1>
+            <h1>Vehículos registrados</h1>
 
             {/* Filtros */}
             <div className="filtersSection">
                 <div className="searchGroup">
-                    <label>Buscar por Económico:</label>
+                    <label>Buscar por económico:</label>
                     <input
                         type="number"
                         name="search"
@@ -103,7 +103,7 @@ const RegisteredVehicles = () => {
                     <div className="filterGroup" key={key}>
                         <label>
                             {key === 'workCenter'
-                                ? 'Centro de Trabajo'
+                                ? 'Centro de trabajo'
                                 : key === 'process'
                                     ? 'Proceso'
                                     : key === 'status'
@@ -120,7 +120,7 @@ const RegisteredVehicles = () => {
                 ))}
 
                 <button onClick={resetFilters} className="resetBtn">
-                    Limpiar Filtros
+                    Limpiar filtros
                 </button>
             </div>
 

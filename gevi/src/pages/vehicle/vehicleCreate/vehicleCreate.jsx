@@ -175,7 +175,7 @@ const AddVehicle = () => {
 
   return (
     <div className="createContainer">
-      <h1>Registrar Nuevo Vehículo</h1>
+      <h1>Registrar nuevo vehículo</h1>
 
       <form onSubmit={handleSubmit} className="reportForm">
         {/* Económico */}
@@ -344,7 +344,7 @@ const AddVehicle = () => {
 
         {/* Botón */}
         <button type="submit" className="submitBtn" disabled={submitting}>
-          {submitting ? 'Guardando...' : 'Guardar Vehículo'}
+          {submitting ? 'Guardando...' : 'Guardar vehículo'}
         </button>
       </form>
 

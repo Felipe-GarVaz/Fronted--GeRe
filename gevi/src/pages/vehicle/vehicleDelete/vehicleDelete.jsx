@@ -177,7 +177,7 @@ const DeleteVehicle = () => {
 
     return (
         <div className="deleteContainer">
-            <h1>Eliminar Vehículo</h1>
+            <h1>Eliminar vehículo</h1>
 
             <form className="reportForm" onSubmit={handleSubmitOrEnter}>
                 {/* Input combinado */}

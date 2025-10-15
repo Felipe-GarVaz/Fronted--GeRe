@@ -155,17 +155,17 @@ const DamagedDevices = () => {
   // ===== Renderizado =====
   return (
     <div className="damagedDeviceContainer">
-      <h1>Dispositivos Defectuosos</h1>
+      <h1>Dispositivos dañados</h1>
 
       {/* Búsqueda por agencia */}
       <div className="searchBox">
-        <label className="searchLabel">Buscar por agencia:</label>
+        <label className="searchLabel">Buscar por centro de trabajo:</label>
         <div className="searchInputGroup">
           <div className="searchInputContainer">
             <input
               type="text"
               className="searchInput"
-              placeholder="Ej: OCCIDENTE"
+              placeholder="Ej: TEZIUTLAN"
               value={searchTerm.toUpperCase()}
               onChange={handleSearchChange}
               onKeyDown={handleKeyDown}

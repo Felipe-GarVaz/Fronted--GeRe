@@ -59,7 +59,7 @@ const AddDevice = () => {
       // Mayúsculas, A-Z 0-9 y guion, máximo 50
       const normalized = value
         .toUpperCase()
-        .replace(/[^A-Z0-9-]/g, '')
+        .replace(/[^A-Z0-9]/g, '')
         .slice(0, 50);
       setFormData((prev) => ({ ...prev, serialNumber: normalized }));
       return;
@@ -192,25 +192,46 @@ const AddDevice = () => {
               type="text"
               name="serialNumber"
               value={formData.serialNumber}
-              onChange={(e) =>
+              onChange={(e) => {
+                const sanitizedValue = e.target.value
+                  .toUpperCase()
+                  .replace(/[^A-Z0-9]/g, '')
+                  .slice(0, 50);
+
+                // Limpiar error si ya es válido
+                if (/^[A-Z0-9]{1,50}$/.test(sanitizedValue)) {
+                  e.target.setCustomValidity(''); // Limpia el mensaje de error
+                }
+
                 setFormData({
                   ...formData,
-                  serialNumber: e.target.value.toUpperCase(),
-                })
-              }
-              onBlur={(e) =>
-                setFormData({ ...formData, serialNumber: e.target.value.trim() })
-              }
-              onInvalid={(e) =>
-                setInvalidMsg(e, 'Ingrese solo números y letras')
-              }
+                  serialNumber: sanitizedValue,
+                });
+              }}
+              onBlur={(e) => {
+                const trimmedValue = e.target.value.trim();
+
+                // Validación final al salir del campo
+                if (!/^[A-Z0-9]{1,50}$/.test(trimmedValue)) {
+                  e.target.setCustomValidity('Ingrese solo números y letras');
+                } else {
+                  e.target.setCustomValidity('');
+                }
+
+                setFormData({ ...formData, serialNumber: trimmedValue });
+              }}
+              onInvalid={(e) => {
+                // Muestra el mensaje personalizado si no es válido
+                e.target.setCustomValidity('Ingrese solo números y letras');
+              }}
               placeholder="Ej. AB123456"
               autoComplete="off"
-              maxLength={20}
-              pattern="[A-Z0-9]{3,}"
+              maxLength={50}
+              pattern="^[A-Z0-9]{1,50}$"
               required
               aria-invalid={serialTaken ? 'true' : 'false'}
             />
+
           </div>
         </div>
 

@@ -43,7 +43,7 @@ const AddUser = () => {
     // Validaciones mínimas
     if (!rpe || rpe.length < 3) return setApiError("RPE mínimo 3 caracteres.");
     if (!name || !lastName) return setApiError("Nombre y apellidos son obligatorios.");
-    if (!password || password.length < 6) return setApiError("Contraseña mínimo 6 caracteres.");
+    if (!password || password.length < 5) return setApiError("Contraseña mínimo 5 caracteres.");
     if (!roleId) return setApiError("Selecciona un rol.");
 
     try {
@@ -159,10 +159,10 @@ const AddUser = () => {
             name="password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
-            onInvalid={(e) => setInvalidMsg(e, "La contraseña debe tener al menos 6 caracteres")}
+            onInvalid={(e) => setInvalidMsg(e, "La contraseña debe tener al menos 5 caracteres")}
             onInput={clearInvalidMsg}
             placeholder="••••••••"
-            minLength={6}
+            minLength={5}
             required
           />
         </div>

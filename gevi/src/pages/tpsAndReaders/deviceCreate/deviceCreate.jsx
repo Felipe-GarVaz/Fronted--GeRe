@@ -33,7 +33,7 @@ const AddDevice = () => {
     const headers = { Authorization: `Bearer ${token}` };
 
     axios
-      .get('http://localhost:8080/api/workCenter', { headers })
+      .get('/api/workCenter', { headers })
       .then((res) => setWorkCenters(res.data || []))
       .catch((err) => {
         console.error('Error cargando catálogos:', err);
@@ -89,7 +89,7 @@ const AddDevice = () => {
         setCheckingSerial(true);
         const token = localStorage.getItem('token');
         const { data } = await axios.get(
-          `http://localhost:8080/api/device/search?query=${encodeURIComponent(
+          `/api/device/search?query=${encodeURIComponent(
             normalizedSerial
           )}`,
           { headers: { Authorization: `Bearer ${token}` }, signal: controller.signal }
@@ -142,7 +142,7 @@ const AddDevice = () => {
         status: 'ACTIVO',
       };
 
-      await axios.post('http://localhost:8080/api/device', payload, {
+      await axios.post('/api/device', payload, {
         headers: {
           Authorization: `Bearer ${token}`,
           'Content-Type': 'application/json',

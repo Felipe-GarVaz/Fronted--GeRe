@@ -44,7 +44,7 @@ const VehicleHistory = () => {
       try {
         const token = localStorage.getItem("token");
         const response = await axios.get(
-          "http://localhost:8080/api/reports/history/suggestions",
+          "/api/reports/history/suggestions",
           { headers: { Authorization: `Bearer ${token}` } }
         );
         setAllSuggestions(response.data || []);
@@ -78,7 +78,7 @@ const VehicleHistory = () => {
       const search = (econ ?? text).trim();
 
       const response = await axios.get(
-        `http://localhost:8080/api/reports/history?search=${encodeURIComponent(
+        `/api/reports/history?search=${encodeURIComponent(
           search
         )}`,
         { headers: { Authorization: `Bearer ${token}` } }

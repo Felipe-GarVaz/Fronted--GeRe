@@ -32,7 +32,7 @@ const TpsReadersMenu = () => {
     const token = localStorage.getItem("token");
 
     try {
-      const response = await fetch("http://localhost:8080/api/device/export", {
+      const response = await fetch("/api/device/export", {
         method: "GET",
         headers: { Authorization: `Bearer ${token}` },
       });

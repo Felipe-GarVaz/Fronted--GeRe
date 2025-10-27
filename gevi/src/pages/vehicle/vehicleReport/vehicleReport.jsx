@@ -39,8 +39,8 @@ const VehicleReport = () => {
       try {
         const token = localStorage.getItem("token");
         const [vehiclesRes, failTypesRes] = await Promise.all([
-          axios.get("http://localhost:8080/api/vehicles", { headers: { Authorization: `Bearer ${token}` } }),
-          axios.get("http://localhost:8080/api/failTypes", { headers: { Authorization: `Bearer ${token}` } })
+          axios.get("/api/vehicles", { headers: { Authorization: `Bearer ${token}` } }),
+          axios.get("/api/failTypes", { headers: { Authorization: `Bearer ${token}` } })
         ]);
         setVehicles(vehiclesRes.data || []);
         setFailTypes(failTypesRes.data || []);
@@ -66,7 +66,7 @@ const VehicleReport = () => {
       try {
         const token = localStorage.getItem("token");
         const response = await axios.get(
-          `http://localhost:8080/api/vehicles/search?query=${encodeURIComponent(searchTerm)}`,
+          `/api/vehicles/search?query=${encodeURIComponent(searchTerm)}`,
           { headers: { Authorization: `Bearer ${token}` } }
         );
         const data = response.data || [];
@@ -274,7 +274,7 @@ const filteredStatusOptions = statusOptions.filter((status) => {
     }
 
     try {
-      await axios.post("http://localhost:8080/api/vehicle-report", payload, {
+      await axios.post("/api/vehicle-report", payload, {
         headers: {
           Authorization: `Bearer ${token}`,
           "Content-Type": "application/json"

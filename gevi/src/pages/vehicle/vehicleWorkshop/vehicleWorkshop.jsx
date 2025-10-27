@@ -53,7 +53,7 @@ const WorkshopVehicle = () => {
     try {
       setFetchError('');
       const token = localStorage.getItem('token');
-      const { data } = await axios.get('http://localhost:8080/api/vehicle-report/workshop', {
+      const { data } = await axios.get('/api/vehicle-report/workshop', {
         headers: { Authorization: `Bearer ${token}` },
       });
       setVehicles(Array.isArray(data) ? data : []);

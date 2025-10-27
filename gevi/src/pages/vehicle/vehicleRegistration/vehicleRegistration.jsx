@@ -25,7 +25,7 @@ const RegisteredVehicles = () => {
         const fetchFilterOptions = async () => {
             try {
                 const token = localStorage.getItem("token");
-                const response = await axios.get("http://localhost:8080/api/vehicles/filters", {
+                const response = await axios.get("/api/vehicles/filters", {
                     headers: { Authorization: `Bearer ${token}` }
                 });
                 setFilterOptions(response.data);
@@ -41,7 +41,7 @@ const RegisteredVehicles = () => {
         const fetchVehicles = async () => {
             try {
                 const token = localStorage.getItem("token");
-                const response = await axios.get("http://localhost:8080/api/vehicles", {
+                const response = await axios.get("/api/vehicles", {
                     headers: { Authorization: `Bearer ${token}` }
                 });
                 setVehicles(response.data);

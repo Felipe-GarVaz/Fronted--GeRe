@@ -3,7 +3,7 @@ import React, { useEffect, useRef, useState } from "react";
 import axios from "axios";
 import "./deviceDelete.css";
 
-const API_BASE = "http://localhost:8080/api";
+const API_BASE = "/api";
 const getTypeRaw = (x) => x?.type ?? x?.deviceType ?? x?.tipo ?? x?.typeName ?? null;
 const formatType = (t) =>
     t

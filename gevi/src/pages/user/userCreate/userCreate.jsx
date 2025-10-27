@@ -3,7 +3,7 @@ import React, { useEffect, useRef, useState } from "react";
 import axios from "axios";
 import "./userCreate.css"; // <-- si prefieres, crea userCreate.css con las mismas clases
 
-const API_BASE = "http://localhost:8080/api";
+const API_BASE = "/api";
 
 const AddUser = () => {
   const rpeRef = useRef(null);

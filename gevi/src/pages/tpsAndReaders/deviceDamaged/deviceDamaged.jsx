@@ -72,7 +72,7 @@ const DamagedDevices = () => {
     try {
       setFetchError('');
       const token = localStorage.getItem('token');
-      const { data } = await axios.get('http://localhost:8080/api/devices/damaged', {
+      const { data } = await axios.get('/api/devices/damaged', {
         headers: { Authorization: `Bearer ${token}` }
       });
       setDamagedDevices(Array.isArray(data) ? data : []);

@@ -43,8 +43,8 @@ const AddVehicle = () => {
     const headers = { Authorization: `Bearer ${token}` };
 
     Promise.all([
-      axios.get('http://localhost:8080/api/workCenter', { headers }),
-      axios.get('http://localhost:8080/api/process', { headers })
+      axios.get('/api/workCenter', { headers }),
+      axios.get('/api/process', { headers })
     ])
       .then(([wcRes, prRes]) => {
         setWorkCenters(wcRes.data || []);
@@ -115,7 +115,7 @@ const AddVehicle = () => {
         year: formData.year === '' ? '' : Number(formData.year),
       };
 
-      await axios.post('http://localhost:8080/api/vehicles', payload, {
+      await axios.post('/api/vehicles', payload, {
         headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' }
       });
 

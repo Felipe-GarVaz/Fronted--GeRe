@@ -11,7 +11,7 @@ const RegisteredDevice = () => {
   useEffect(() => {
     const token = localStorage.getItem("token");
 
-    axios.get("http://localhost:8080/api/device", {
+    axios.get("/api/device", {
       headers: { Authorization: `Bearer ${token}` }
     })
       .then(response => {

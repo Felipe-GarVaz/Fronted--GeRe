@@ -3,7 +3,7 @@ import React, { useEffect, useRef, useState } from "react";
 import axios from "axios";
 import "./userDelete.css";
 
-const API_BASE = "http://localhost:8080/api";
+const API_BASE = "/api";
 
 // Helpers
 const getFullName = (u) => {

@@ -31,7 +31,7 @@ const VehicleMenu = () => {
     const token = localStorage.getItem("token");
 
     try {
-      const response = await fetch("http://localhost:8080/api/vehicles/export", {
+      const response = await fetch("/api/vehicles/export", {
         method: "GET",
         headers: { Authorization: `Bearer ${token}` }
       });

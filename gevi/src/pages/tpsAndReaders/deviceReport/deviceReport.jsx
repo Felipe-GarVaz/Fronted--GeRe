@@ -36,11 +36,11 @@ const ReportTPSReaders = () => {
     const token = localStorage.getItem("token");
     const headers = { Authorization: `Bearer ${token}` };
 
-    axios.get("http://localhost:8080/api/workCenter", { headers })
+    axios.get("/api/workCenter", { headers })
       .then(res => setWorkCenters(res.data || []))
       .catch(err => console.error("Error al cargar agencias:", err));
 
-    axios.get("http://localhost:8080/api/failTypeDevice", { headers })
+    axios.get("/api/failTypeDevice", { headers })
       .then(res => setFailTypes(res.data || []))
       .catch(err => console.error("Error al cargar tipos de falla:", err));
   }, []);
@@ -64,7 +64,7 @@ const ReportTPSReaders = () => {
     if (formData.deviceType && formData.workCenterId) {
       // Enviamos ambos: workCenterId (preferido) y workCenter (nombre) por compatibilidad
       const wc = workCenters.find(w => String(w.id) === String(formData.workCenterId));
-      axios.get("http://localhost:8080/api/device/serialNumber", {
+      axios.get("/api/device/serialNumber", {
         params: {
           deviceType: formData.deviceType,
           workCenterId: formData.workCenterId,
@@ -139,7 +139,7 @@ const ReportTPSReaders = () => {
         newStatus: deviceInfo?.status === 'DEFECTUOSO' ? formData.newStatus || null : null
       };
 
-      await axios.post("http://localhost:8080/api/deviceReport", payload, { headers });
+      await axios.post("/api/deviceReport", payload, { headers });
 
       setShowModal(true);
       // Reset del formulario

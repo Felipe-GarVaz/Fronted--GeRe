@@ -78,26 +78,33 @@ const VehicleHistory = () => {
       const search = (econ ?? text).trim();
 
       const response = await axios.get(
-        `/api/reports/history?search=${encodeURIComponent(
-          search
-        )}`,
+        `/api/reports/history?search=${encodeURIComponent(search)}`,
         { headers: { Authorization: `Bearer ${token}` } }
       );
 
       const data = Array.isArray(response.data) ? response.data : [];
 
-      // Último reporte por vehículo
+      // Normaliza fecha/hora
+      const normalizeDate = (r) => {
+        let hour = r.hour;
+        if (!hour) return null;
+        if (hour.length === 5) hour += ":00"; // 16:30 → 16:30:00
+        return new Date(`${r.date}T${hour}`);
+      };
+
+      // Detecta el último por vehículo según fecha/hora válidas
       const lastByVehicle = {};
       for (const r of data) {
-        const when = new Date(`${r.date}T${r.hour}`);
-        const k = r.economical;
-        const prev = lastByVehicle[k];
+        const when = new Date(`${r.date}T${r.hour?.length === 5 ? r.hour + ":00" : r.hour}`);
+        if (isNaN(when)) continue; // evita Invalid Date
+        const key = r.economical?.trim().toUpperCase(); // evita diferencias por espacios o mayúsculas
+        const prev = lastByVehicle[key];
         if (!prev || when > new Date(`${prev.date}T${prev.hour}`)) {
-          lastByVehicle[k] = r;
+          lastByVehicle[key] = { ...r, when };
         }
       }
 
-      // Enriquecer y ordenar por fecha/hora desc
+      // Enriquecer y ordenar
       const enriched = data
         .map((r) => {
           const isLatest = r.id === lastByVehicle[r.economical]?.id;
@@ -107,10 +114,7 @@ const VehicleHistory = () => {
           }
           return { ...r, isLatest, formattedElapsedTime };
         })
-        .sort(
-          (a, b) =>
-            new Date(`${b.date}T${b.hour}`) - new Date(`${a.date}T${a.hour}`)
-        );
+        .sort((a, b) => normalizeDate(b) - normalizeDate(a));
 
       setFilteredReports(enriched);
     } catch (error) {
@@ -214,7 +218,7 @@ const VehicleHistory = () => {
 const ReportCard = ({ report }) => {
   const timer = useElapsedTimer(
     `${report.economical}-${report.id}`,
-    `${report.date}T${report.hour}`
+    `${report.date}T${report.hour?.length === 5 ? report.hour + ":00" : report.hour}`
   );
 
   const mileageStr =
@@ -275,14 +279,16 @@ const ReportCard = ({ report }) => {
         </div>
       )}
 
-      {(report.isLatest || report.formattedElapsedTime) && (
+      {(report.isLatest && report.newState === "INDISPONIBLE") || report.formattedElapsedTime ? (
         <div className="detailRow">
           <strong>Tiempo transcurrido:</strong>{" "}
           <span className="statusBadge timer">
-            {report.isLatest ? timer : report.formattedElapsedTime}
+            {report.isLatest && report.newState === "INDISPONIBLE"
+              ? timer
+              : report.formattedElapsedTime}
           </span>
         </div>
-      )}
+      ) : null}
 
       <div className="reportedBy">
         Reportado por: {report.reportedBy}{" "}
